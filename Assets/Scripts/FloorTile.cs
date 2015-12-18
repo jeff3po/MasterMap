@@ -1,19 +1,25 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
 public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScrollHandler
 {
 	public Image floorImage;
 	public CanvasGroup group;
+	public int xPos;
+	public int yPos;
+	public Color color;
 
 	WorldMap map;
 	static bool touching = false;
 
-	public void Setup ( WorldMap m )
+	public void Setup ( WorldMap m, int x, int y )
 	{
 		map = m;
+		xPos = x;
+		yPos = y;
 	}
 
 	void Update()
@@ -32,7 +38,7 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 		if ( map.controlPanel.CanDrag == false )
 		{
 			// Can draw!
-			floorImage.color = map.controlPanel.currentColor;
+			map.AddToAdjacentRoom(this);
 		}
 	}
 
