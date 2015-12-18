@@ -104,53 +104,104 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 		Zoom(false);
 	}
 
+	public enum AddFloorState
+	{
+		undefined,
+		Adding,
+		Removing
+	}
+
+	public AddFloorState addState = AddFloorState.undefined;
+
 	public void AddToAdjacentRoom ( FloorTile tile )
 	{
-		List<Room> adjacentRooms = new List<Room>();
-		foreach ( Room r in rooms )
+		// Clicking within an existing room toggles it
+		if ( addState == AddFloorState.undefined || addState == AddFloorState.Removing)
 		{
-			if ( r.IsAdajcent(tile) )
+			bool reevaluate = false;
+			foreach ( Room r in rooms )
 			{
-				adjacentRooms.Add ( r );
-			}
-		}
-
-		if ( adjacentRooms.Count == 1 )
-		{
-			Room r = adjacentRooms[0];
-			r.AddFloorTile ( tile );
-			Debug.Log ( "Added tile "+tile.name+" to "+r.name );
-			return;
-		}
-		else
-		if ( adjacentRooms.Count > 1 )
-		{
-			Room r = adjacentRooms[0];
-			r.AddFloorTile ( tile );
-			for ( int i=1;i<adjacentRooms.Count;i++)
-			{
-				Room otherRoom = adjacentRooms[i];
-				foreach ( FloorTile t in otherRoom.tiles )
+				if ( r.tiles.Contains ( tile ) )
 				{
-					r.AddFloorTile(t);
+					addState = AddFloorState.Removing;
+					r.RemoveFloorTile(tile);
+					tile.SetColor ( Color.white );
+					reevaluate = true;
+					break;
 				}
 			}
-			// Clear out the latters from the main room list
-			while ( adjacentRooms.Count > 1 )
+			if ( reevaluate )
 			{
-				rooms.Remove ( adjacentRooms[1] );
-				adjacentRooms.RemoveAt(1);
+				// If we remove a tile, we'll fill this list and re-evaluate the entire map
+				List<FloorTile> allActiveTiles = new List<FloorTile>();
+				foreach ( Room r in rooms )
+				{
+					foreach ( FloorTile t in r.tiles )
+					{
+						allActiveTiles.Add ( t );
+					}
+				}
+
+				// Go through re-adding all the tiles as though we're starting from scratch
+				rooms.Clear();
+				foreach ( FloorTile t in allActiveTiles )
+				{
+					addState = AddFloorState.Adding;
+					AddToAdjacentRoom(t);
+				}
+				return;
 			}
-			
-			// And move all the remaining tiles into this room, too
-			Debug.Log ( "Added tile "+tile.name+" to "+r.name );
-			return;
 		}
 
+		if ( addState == AddFloorState.undefined || addState == AddFloorState.Adding )
+		{
+			List<Room> adjacentRooms = new List<Room>();
+			foreach ( Room r in rooms )
+			{
+				if ( r.IsAdajcent(tile) )
+				{
+					addState = AddFloorState.Adding;
+					adjacentRooms.Add ( r );
+				}
+			}
 
-		Room newRoom = new Room(rooms.Count,this);
-		rooms.Add( newRoom );
-		newRoom.AddFloorTile( tile );
-		Debug.Log ( "Added tile "+tile.name+" to "+newRoom.name );
+			if ( adjacentRooms.Count == 1 )
+			{
+				Room r = adjacentRooms[0];
+				r.AddFloorTile ( tile );
+				Debug.Log ( "Added tile "+tile.name+" to "+r.name );
+				return;
+			}
+			else
+			if ( adjacentRooms.Count > 1 )
+			{
+				Room r = adjacentRooms[0];
+				r.AddFloorTile ( tile );
+				for ( int i=1;i<adjacentRooms.Count;i++)
+				{
+					Room otherRoom = adjacentRooms[i];
+					foreach ( FloorTile t in otherRoom.tiles )
+					{
+						r.AddFloorTile(t);
+					}
+				}
+				// Clear out the latters from the main room list
+				while ( adjacentRooms.Count > 1 )
+				{
+					rooms.Remove ( adjacentRooms[1] );
+					adjacentRooms.RemoveAt(1);
+				}
+				
+				// And move all the remaining tiles into this room, too
+				Debug.Log ( "Added tile "+tile.name+" to "+r.name );
+				return;
+			}
+
+			Room newRoom = new Room(rooms.Count,this);
+			rooms.Add( newRoom );
+			addState = AddFloorState.Adding;
+			newRoom.AddFloorTile( tile );
+			Debug.Log ( "Added tile "+tile.name+" to "+newRoom.name );
+		}
 	}
 }

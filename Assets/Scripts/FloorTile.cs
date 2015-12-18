@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
-public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScrollHandler
+public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScrollHandler, IEndDragHandler, IPointerUpHandler
 {
 	public Image floorImage;
 	public CanvasGroup group;
@@ -31,6 +31,12 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 				DrawHere();
 			}
 		}
+	}
+
+	public void SetColor ( Color c )
+	{
+		color = c;
+		floorImage.color = c;
 	}
 
 	void DrawHere()
@@ -63,6 +69,16 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 	{
 		//Debug.Log ( "Drag "+data.delta );
 		map.Scroll(data.delta);
+	}
+
+	public void OnEndDrag(PointerEventData data)
+	{
+		map.addState = WorldMap.AddFloorState.undefined;
+	}
+
+	public void OnPointerUp(PointerEventData data)
+	{
+		map.addState = WorldMap.AddFloorState.undefined;
 	}
 
 	public void StartTouch()

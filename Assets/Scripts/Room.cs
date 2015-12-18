@@ -20,6 +20,11 @@ public class Room
 
 	public List<FloorTile> tiles = new List<FloorTile>();
 
+	public void RemoveFloorTile ( FloorTile tile )
+	{
+		tiles.Remove ( tile );
+	}
+
 	public bool IsAdajcent(FloorTile tile)
 	{
 		foreach ( FloorTile t in tiles )
@@ -36,8 +41,7 @@ public class Room
 		if ( tiles.Contains (tile) == false )
 		{
 			tiles.Add ( tile );
-			tile.color = roomColor;
-			tile.floorImage.color = roomColor;
+			tile.SetColor ( roomColor );
 		}
 	}
 }
