@@ -11,7 +11,9 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 	public Scrollbar zoomBar;
 	public ControlPanel controlPanel;
 
-	List<Room> rooms = new List<Room>();
+	public Door doorTemplate;
+
+	public List<Room> rooms = new List<Room>();
 
 	FloorTile[,] worldGrid;
 
@@ -22,8 +24,19 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 
 	public List<Color> globalColors = new List<Color>();
 
+	public enum EditMode
+	{
+		None,
+		Room,
+		Decoration,
+		Play
+	}
+
+	public EditMode editMode = EditMode.None;
+
 	void Start()
 	{
+		doorTemplate.gameObject.SetActive ( false );
 		for ( int r=0;r<3;r++)
 		{
 			for ( int g=0;g<3;g++)
@@ -59,13 +72,6 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 				newTile.name = x+"_"+y;
 				worldGrid[x,y] = newTile;
 			}
-		}
-
-		Vector2 offset = new Vector2 ( -columnCount/4 * tileWidth, -rowCount/4 * tileHeight );
-
-		foreach ( FloorTile t in worldGrid )
-		{
-			t.transform.Translate ( offset );
 		}
 	}
 
@@ -113,8 +119,71 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 
 	public AddFloorState addState = AddFloorState.undefined;
 
+	public void DrawOnThisTile( FloorTile tile )
+	{
+		// Which mode are we in?
+		if ( controlPanel.drawingPanelMode == ControlPanel.DrawingPanelMode.Floor )
+		{
+			AddToAdjacentRoom ( tile );
+		}
+		else
+		if ( controlPanel.drawingPanelMode == ControlPanel.DrawingPanelMode.Door )
+		{
+			DivideRoom ( tile );
+		}
+	}
+
+	public void DivideRoom ( FloorTile tile )
+	{
+		FloorTile doorTile = null;
+		// Must be touching exising floor tile, and it must have exactly two adjacent tiles axially aligned
+		foreach ( Room r in rooms )
+		{
+			if ( r.tiles.Contains ( tile ) )
+			{
+				// HACK! For the moment, a door can only be placed in a single tile that merges two rooms
+				List<FloorTile> axiallyAligned = r.GetAdjacent(tile, true);
+
+				if (axiallyAligned.Count == 2 )
+				{
+					// Perfect for door. Temporarily remove this tile, 
+					// reevaluate the rooms to split them then add the tile back to both rooms with the door flag
+					doorTile = tile;
+					doorTile.isDoor = true;
+					r.RemoveFloorTile(tile);
+					ReevaluateMap();
+
+					Door newDoor = Instantiate ( doorTemplate );
+					newDoor.gameObject.SetActive ( true );
+					newDoor.transform.SetParent( doorTile.transform);
+					newDoor.transform.localScale = Vector3.one;
+					newDoor.transform.localPosition = Vector3.zero;
+					if ( axiallyAligned[0].yPos != doorTile.yPos)
+					{
+						// Vertically aligned, so rotate door to match
+						newDoor.transform.localRotation = Quaternion.Euler ( new Vector3 ( 0,0,90));
+					}
+
+					// Re-add to every possible adjacent 
+					//(should only be the two divided by this door accoring to axiallyAligned check above)
+					foreach ( Room newroom in rooms )
+					{
+						if ( newroom.IsAdajcent ( doorTile ))
+						{
+							newroom.AddFloorTile ( doorTile );
+						}
+					}
+				}
+				break;
+			}
+		}
+	}
+
 	public void AddToAdjacentRoom ( FloorTile tile )
 	{
+		// If a door has been set, the tile's room can't be altered
+		if ( tile.isDoor ) { return; }
+
 		// Clicking within an existing room toggles it
 		if ( addState == AddFloorState.undefined || addState == AddFloorState.Removing)
 		{
@@ -132,23 +201,7 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 			}
 			if ( reevaluate )
 			{
-				// If we remove a tile, we'll fill this list and re-evaluate the entire map
-				List<FloorTile> allActiveTiles = new List<FloorTile>();
-				foreach ( Room r in rooms )
-				{
-					foreach ( FloorTile t in r.tiles )
-					{
-						allActiveTiles.Add ( t );
-					}
-				}
-
-				// Go through re-adding all the tiles as though we're starting from scratch
-				rooms.Clear();
-				foreach ( FloorTile t in allActiveTiles )
-				{
-					addState = AddFloorState.Adding;
-					AddToAdjacentRoom(t);
-				}
+				ReevaluateMap();
 				return;
 			}
 		}
@@ -158,7 +211,7 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 			List<Room> adjacentRooms = new List<Room>();
 			foreach ( Room r in rooms )
 			{
-				if ( r.IsAdajcent(tile) )
+				if ( r.IsAdajcent(tile,true) )
 				{
 					addState = AddFloorState.Adding;
 					adjacentRooms.Add ( r );
@@ -169,7 +222,6 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 			{
 				Room r = adjacentRooms[0];
 				r.AddFloorTile ( tile );
-				Debug.Log ( "Added tile "+tile.name+" to "+r.name );
 				return;
 			}
 			else
@@ -191,17 +243,69 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 					rooms.Remove ( adjacentRooms[1] );
 					adjacentRooms.RemoveAt(1);
 				}
-				
-				// And move all the remaining tiles into this room, too
-				Debug.Log ( "Added tile "+tile.name+" to "+r.name );
+
+				ResetVisPanel();
+
 				return;
 			}
 
 			Room newRoom = new Room(rooms.Count,this);
+			controlPanel.visPanel.AddRoomToggle ( rooms.Count, newRoom.roomColor);
 			rooms.Add( newRoom );
 			addState = AddFloorState.Adding;
 			newRoom.AddFloorTile( tile );
-			Debug.Log ( "Added tile "+tile.name+" to "+newRoom.name );
+			ResetVisPanel();
+		}
+	}
+
+	void ResetVisPanel()
+	{
+		// Go in reverse order to wipe out empty room definitions
+		for ( int i=rooms.Count-1;i>=0;i--)
+		{
+			if ( rooms[i].tiles.Count == 0 )
+			{
+				rooms.RemoveAt ( i );
+			}
+		}
+
+		controlPanel.visPanel.Reset();
+
+		for ( int i=0;i<rooms.Count;i++)
+		{
+			controlPanel.visPanel.AddRoomToggle ( i, rooms[i].roomColor );
+		}
+	}
+
+	void ReevaluateMap()
+	{
+		controlPanel.visPanel.Reset();
+
+		// If we remove a tile, we'll fill this list and re-evaluate the entire map
+		List<FloorTile> allActiveTiles = new List<FloorTile>();
+		foreach ( Room r in rooms )
+		{
+			foreach ( FloorTile t in r.tiles )
+			{
+				allActiveTiles.Add ( t );
+			}
+		}
+
+		// Go through re-adding all the tiles as though we're starting from scratch
+		rooms.Clear();
+
+		foreach ( FloorTile t in allActiveTiles )
+		{
+			addState = AddFloorState.Adding;
+			AddToAdjacentRoom(t);
+		}
+	}
+
+	public void SetRoomVisibility ( int index, bool vis )
+	{
+		foreach ( FloorTile t in rooms[index].tiles )
+		{
+			t.gameObject.SetActive ( vis );
 		}
 	}
 }

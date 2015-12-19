@@ -5,11 +5,12 @@ using System.Collections.Generic;
 /// <summary>
 /// A room is a collection of floor tiles
 /// </summary>
+[System.Serializable]
 public class Room
 {
 	public Color roomColor = Color.white;
 	public string name;
-	WorldMap worldMap;
+	public WorldMap worldMap;
 
 	public Room ( int index, WorldMap map )
 	{
@@ -25,8 +26,9 @@ public class Room
 		tiles.Remove ( tile );
 	}
 
-	public bool IsAdajcent(FloorTile tile)
+	public bool IsAdajcent(FloorTile tile, bool ignoreDoors=false)
 	{
+		if ( ignoreDoors && tile.isDoor ) { return false; }
 		foreach ( FloorTile t in tiles )
 		{
 			int deltaX = Mathf.Abs (t.xPos - tile.xPos);
@@ -34,6 +36,22 @@ public class Room
 			if ( deltaX + deltaY <= 1 ) { return true; }
 		}
 		return false;
+	}
+
+	/// <summary>
+	/// AxialOnly ignores diagonals 
+	/// </summary>
+	public List<FloorTile> GetAdjacent ( FloorTile tile, bool axialOnly )
+	{
+		List<FloorTile> adjs = new List<FloorTile>();
+		foreach (FloorTile t in tiles )
+		{
+			if ( t == tile ) { continue; }
+			int deltaX = Mathf.Abs (t.xPos - tile.xPos);
+			int deltaY = Mathf.Abs (t.yPos - tile.yPos);
+			if ( deltaX + deltaY <= 1 ) { adjs.Add ( t ); }
+		}
+		return adjs;
 	}
 
 	public void AddFloorTile ( FloorTile tile )

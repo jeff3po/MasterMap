@@ -1,15 +1,30 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 using DG.Tweening;
 
 public class ControlPanel : MonoBehaviour 
 {
+	public enum DrawingPanelMode
+	{
+		Floor,
+		Door
+	}
+
+	public DrawingPanelMode drawingPanelMode = DrawingPanelMode.Floor;
+
+	public WorldMap map;
+
+	public RoomVisibilityPanel visPanel;
+
 	public Toggle toggleLockDrag;
+
+	public Dropdown editModeDropdown;
 
 	public Image frame;
 
-	bool _canDrag = true;
+	bool _canDrag = false;
 
 	public bool _isOpen = true;
 
@@ -20,11 +35,29 @@ public class ControlPanel : MonoBehaviour
 
 	public Color currentColor = Color.white;
 
+	public DrawingPanel drawingPanel;
+
 	void Start()
 	{
+		List<string>optionNames = new List<string> ( System.Enum.GetNames ( typeof(WorldMap.EditMode)) );
+		editModeDropdown.AddOptions( optionNames );
 		Open ( true );
 		_controlPanelClosed = Vector2.zero;
 		_controlPanelClosed.x -= frame.rectTransform.sizeDelta.x - OpenButton_ToOpen.image.rectTransform.sizeDelta.x;
+		drawingPanel.AddButton ( "Draw Floors", DrawRooms );
+		drawingPanel.AddButton ( "Set Doors", SetDoors );
+	}
+
+	void DrawRooms()
+	{
+		Debug.Log ( "Draw rooms");
+		drawingPanelMode = DrawingPanelMode.Floor;
+	}
+
+	void SetDoors()
+	{
+		Debug.Log ( "Set Doors");
+		drawingPanelMode = DrawingPanelMode.Door;
 	}
 
 	public void Open ( bool open )

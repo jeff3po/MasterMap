@@ -12,6 +12,8 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 	public int yPos;
 	public Color color;
 
+	public bool isDoor = false;
+
 	WorldMap map;
 	static bool touching = false;
 
@@ -41,11 +43,14 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 
 	void DrawHere()
 	{
-		if ( map.controlPanel.CanDrag == false )
+		if ( map.controlPanel.CanDrag )
 		{
-			// Can draw!
-			map.AddToAdjacentRoom(this);
+			// If in drag mode, there's no drawing, no matter what
+			return;
 		}
+
+		// Can draw!
+		map.DrawOnThisTile(this);
 	}
 
 	public void OnPointerEnter(PointerEventData data)
