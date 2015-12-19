@@ -34,6 +34,12 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 
 	public EditMode editMode = EditMode.None;
 
+	public void SetEditMode ( EditMode mode )
+	{
+		editMode = mode;
+		controlPanel.ShowPanel ( mode );
+	}
+
 	void Start()
 	{
 		doorTemplate.gameObject.SetActive ( false );
@@ -77,12 +83,29 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 
 	public void Scroll ( Vector2 scroll )
 	{
+		Vector3 pos = mapScroller.transform.position;
+		if ( pos.x > 0 || pos.y > 0 )
+		{
+			if ( pos.x > 0 ) 
+			{
+				pos.x = 0;
+				mapScroller.transform.position = pos;
+				return;
+			}
+			if ( pos.y > 0 ) 
+			{
+				pos.y = 0;
+				mapScroller.transform.position = pos;
+			}
+			return;
+		}
+
+//		Debug.Log ( mapScroller.transform.position+"");
 		if ( controlPanel.CanDrag )
 		{
 			mapScroller.transform.Translate ( scroll );
 		}
 	}
-
 
 	float zoomFactor = 1.0f;
 
@@ -121,15 +144,29 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 
 	public void DrawOnThisTile( FloorTile tile )
 	{
-		// Which mode are we in?
-		if ( controlPanel.drawingPanelMode == ControlPanel.DrawingPanelMode.Floor )
+		// If in drag mode, no can edit
+		if ( controlPanel.CanDrag )
 		{
-			AddToAdjacentRoom ( tile );
+			return;
+		}
+
+		if ( editMode == EditMode.Room )
+		{
+			// Which room mode are we in?
+			if ( controlPanel.drawingPanelMode == ControlPanel.DrawingPanelMode.Floor )
+			{
+				AddToAdjacentRoom ( tile );
+			}
+			else
+			if ( controlPanel.drawingPanelMode == ControlPanel.DrawingPanelMode.Door )
+			{
+				DivideRoom ( tile );
+			}
 		}
 		else
-		if ( controlPanel.drawingPanelMode == ControlPanel.DrawingPanelMode.Door )
+		if ( editMode == EditMode.Decoration )
 		{
-			DivideRoom ( tile );
+			// TODO: Add decoration accoriding to button selected in panel	
 		}
 	}
 
@@ -303,9 +340,19 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 
 	public void SetRoomVisibility ( int index, bool vis )
 	{
-		foreach ( FloorTile t in rooms[index].tiles )
+		rooms[index].SetVisible ( vis );
+
+		// Go back through all doors and turn their tiles back on if either of their rooms is active
+		foreach ( Room r in rooms )
 		{
-			t.gameObject.SetActive ( vis );
+			if ( r.isVisible == false ) { continue; }
+			foreach ( FloorTile t in r.tiles )
+			{
+				if ( t.isDoor )
+				{
+					t.SetVisible ( true );
+				}
+			}
 		}
 	}
 }

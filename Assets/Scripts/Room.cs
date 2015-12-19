@@ -8,6 +8,8 @@ using System.Collections.Generic;
 [System.Serializable]
 public class Room
 {
+	public bool isVisible = true;
+
 	public Color roomColor = Color.white;
 	public string name;
 	public WorldMap worldMap;
@@ -21,6 +23,14 @@ public class Room
 
 	public List<FloorTile> tiles = new List<FloorTile>();
 
+	public void SetVisible ( bool vis )
+	{
+		isVisible = vis;
+		foreach ( FloorTile t in tiles )
+		{
+			t.SetVisible ( vis );
+		}
+	}
 	public void RemoveFloorTile ( FloorTile tile )
 	{
 		tiles.Remove ( tile );

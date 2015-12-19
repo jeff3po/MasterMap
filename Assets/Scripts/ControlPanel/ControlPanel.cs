@@ -36,9 +36,12 @@ public class ControlPanel : MonoBehaviour
 	public Color currentColor = Color.white;
 
 	public DrawingPanel drawingPanel;
+	public DecorationPanel decorationPanel;
 
+	public InsertDecoration decorationMode = InsertDecoration.None;
 	void Start()
 	{
+		toggleLockDrag.isOn = _canDrag;
 		List<string>optionNames = new List<string> ( System.Enum.GetNames ( typeof(WorldMap.EditMode)) );
 		editModeDropdown.AddOptions( optionNames );
 		Open ( true );
@@ -46,17 +49,69 @@ public class ControlPanel : MonoBehaviour
 		_controlPanelClosed.x -= frame.rectTransform.sizeDelta.x - OpenButton_ToOpen.image.rectTransform.sizeDelta.x;
 		drawingPanel.AddButton ( "Draw Floors", DrawRooms );
 		drawingPanel.AddButton ( "Set Doors", SetDoors );
+
+		decorationPanel.AddButton ( "No deco", AddDeco_None );
+		decorationPanel.AddButton ( "Add pillar", AddDeco_Pillar );
+
+		map.SetEditMode ( WorldMap.EditMode.Room );
+	}
+
+	public void ChangePanel()
+	{
+		string option = editModeDropdown.captionText.text;
+		if ( option == "Decoration")
+		{
+			map.SetEditMode ( WorldMap.EditMode.Decoration );
+			ShowPanel ( WorldMap.EditMode.Decoration );
+		}
+		else
+		if ( option == "Room")
+		{
+			map.SetEditMode ( WorldMap.EditMode.Room );
+			ShowPanel ( WorldMap.EditMode.Room );
+		}
+	}
+
+	public void ShowPanel ( WorldMap.EditMode mode )
+	{
+		drawingPanel.gameObject.SetActive ( false );
+		decorationPanel.gameObject.SetActive ( false );
+		// TODO: Hide all other panels
+
+		if ( mode == WorldMap.EditMode.Room )
+		{
+			drawingPanel.gameObject.SetActive ( true );
+		}
+		else
+		if ( mode == WorldMap.EditMode.Decoration )
+		{
+			decorationPanel.gameObject.SetActive ( true );
+		}
+	}
+
+	public enum InsertDecoration
+	{
+		None,
+		Pillar
+	}
+
+	void AddDeco_Pillar()
+	{
+		decorationMode = InsertDecoration.Pillar;
+	}
+
+	void AddDeco_None()
+	{
+		decorationMode = InsertDecoration.None;
 	}
 
 	void DrawRooms()
 	{
-		Debug.Log ( "Draw rooms");
 		drawingPanelMode = DrawingPanelMode.Floor;
 	}
 
 	void SetDoors()
 	{
-		Debug.Log ( "Set Doors");
 		drawingPanelMode = DrawingPanelMode.Door;
 	}
 

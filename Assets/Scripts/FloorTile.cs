@@ -17,6 +17,11 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 	WorldMap map;
 	static bool touching = false;
 
+	public void SetVisible ( bool vis )
+	{
+		gameObject.SetActive ( vis );
+	}
+
 	public void Setup ( WorldMap m, int x, int y )
 	{
 		map = m;
@@ -43,12 +48,6 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 
 	void DrawHere()
 	{
-		if ( map.controlPanel.CanDrag )
-		{
-			// If in drag mode, there's no drawing, no matter what
-			return;
-		}
-
 		// Can draw!
 		map.DrawOnThisTile(this);
 	}

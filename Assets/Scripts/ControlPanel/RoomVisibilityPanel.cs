@@ -19,7 +19,7 @@ public class RoomVisibilityPanel : MonoBehaviour
 			Destroy ( t.gameObject );
 		}
 		toggles.Clear();
-		Debug.Log ( "Reset toggles");
+//		Debug.Log ( "Reset toggles");
 	}
 
 	/// <summary>
@@ -40,6 +40,6 @@ public class RoomVisibilityPanel : MonoBehaviour
 		tog.transform.localScale = Vector3.one;
 		toggles.Add ( tog );
 		tog.Setup ( index, c);
-		Debug.Log ( "Added room toggle for index "+index);
+//		Debug.Log ( "Added room toggle for index "+index);
 	}
 }
