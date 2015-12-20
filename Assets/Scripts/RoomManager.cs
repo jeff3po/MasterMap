@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
 /// <summary>
 /// All things reoom-related
 /// </summary>
-[System.Serializable]
-public class RoomManager
+public class RoomManager : MonoBehaviour
 {
 	public WorldMap map;
 
@@ -17,7 +17,6 @@ public class RoomManager
 	public Door doorTemplate;
 
 	public List<FloorTile> allTiles = new List<FloorTile>();
-
 
 	public enum AddFloorState
 	{
@@ -30,7 +29,7 @@ public class RoomManager
 	/// <summary>
 	/// When editing a room, touches can add/remove components based on this state
 	/// </summary>
-	public AddFloorState addState = AddFloorState.undefined;
+	public AddFloorState currentAddFloorState = AddFloorState.undefined;
 
 	/// <summary>
 	/// Every tile on the map starts here
@@ -180,16 +179,16 @@ public class RoomManager
 	/// </summary>
 	public void InteractWithFloorTile ( FloorTile tile )
 	{
-		if ( addState == AddFloorState.invalid ) { return; }
+		if ( currentAddFloorState == AddFloorState.invalid ) { return; }
 
 		if ( currentRoom == null ) { return; }
 
-		if ( addState == AddFloorState.undefined || addState == AddFloorState.Removing)
+		if ( currentAddFloorState == AddFloorState.undefined || currentAddFloorState == AddFloorState.Removing)
 		{
 			if ( currentRoom.tiles.Contains ( tile ) )
 			{
 				// Already exists, so toggle to remove mode and pull it out
-				addState = AddFloorState.Removing;
+				SetAddFloorState ( AddFloorState.Removing );
 				if ( tile.isDoor )
 				{
 					tile.isDoor = false;
@@ -230,9 +229,9 @@ public class RoomManager
 		// If not overllaping (or overlapping in a way that can make a door), go ahead and add it
 		if ( otherRoom == null || fromRoom.Count > 0 )
 		{
-			if ( addState == AddFloorState.undefined || addState == AddFloorState.Adding)
+			if ( currentAddFloorState == AddFloorState.undefined || currentAddFloorState == AddFloorState.Adding)
 			{
-				addState = AddFloorState.Adding;
+				SetAddFloorState ( AddFloorState.Adding );
 				currentRoom.AddFloorTile ( tile );
 			}
 		}
@@ -262,7 +261,7 @@ public class RoomManager
 					newDoor.name = "Door_"+tile.name+" "+currentRoom.name+" -> "+otherRoom.name;
 					Debug.Log ( "Adding "+newDoor.name );
 					// Once a door has been added, no more drawing on this stroke
-					addState = AddFloorState.invalid;
+					SetAddFloorState ( AddFloorState.invalid );
 
 					if ( axiallyAligned[0].yPos != tile.yPos)
 					{
@@ -275,9 +274,40 @@ public class RoomManager
 			{
 				// No non-door overlaps allowed. Take it back!
 				currentRoom.RemoveFloorTile ( tile );
-				addState = AddFloorState.invalid;
+				SetAddFloorState ( AddFloorState.invalid );
 				SetCurrentRoom ( currentRoom );
 			}
 		}
+	}
+
+	bool resetAddFloor = false;
+	public void ResetAddFloorState()
+	{
+		resetAddFloor = true;
+	}
+
+	public void SetAddFloorState ( AddFloorState state )
+	{
+		if ( state == currentAddFloorState ) { return; }
+		Debug.Log ( "Changing state from "+currentAddFloorState.ToString()+" to "+state.ToString() );
+		currentAddFloorState = state;
+	}
+
+	void Update()
+	{
+		if ( resetAddFloor )
+		{
+			resetAddFloor = false;
+			SetAddFloorState ( AddFloorState.undefined );
+		}
+
+		string message = string.Format("State: {0}, touching: {1}", currentAddFloorState.ToString(), FloorTile.touching.ToString());
+		SetDebugMessage ( message );
+	}
+
+	public Text debugMessage;
+	void SetDebugMessage( string message )
+	{
+		debugMessage.text = message;
 	}
 }

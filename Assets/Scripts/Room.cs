@@ -10,15 +10,16 @@ public class Room
 {
 	public bool isVisible = true;
 
+
 	public Color roomColor = Color.white;
 	public string name;
-	WorldMap worldMap;
+//	WorldMap worldMap;
 
 	public Room ( int index, WorldMap map )
 	{
 		name = "Room"+index;
 		roomColor = map.globalColors[index];
-		worldMap = map;
+//		worldMap = map;
 	}
 
 	/// <summary>

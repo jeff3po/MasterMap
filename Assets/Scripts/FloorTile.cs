@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
-public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScrollHandler, IEndDragHandler, IPointerUpHandler
+public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScrollHandler, IPointerUpHandler, IPointerDownHandler //, IEndDragHandler
 {
 	public RoomManager roomManager;
 	public Image floorImage;
@@ -18,7 +18,8 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 	List<Room> owningRooms = new List<Room>();
 
 	WorldMap map;
-	static bool touching = false;
+
+	static public bool touching = false;
 
 	public void AddToRoom ( Room r )
 	{
@@ -61,17 +62,6 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 		yPos = y;
 	}
 
-	void Update()
-	{
-		if ( EventSystem.current.currentSelectedGameObject == this )
-		{
-			if ( touching )
-			{
-				ClickThisTile();
-			}
-		}
-	}
-
 	public void SetColor ( Color c )
 	{
 		color = c;
@@ -86,6 +76,7 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 
 	public void OnPointerEnter(PointerEventData data)
 	{
+		// If already dragging, entering a new tile counts as clicking it 
 		if ( touching )
 		{
 			ClickThisTile();
@@ -107,29 +98,33 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 		map.Scroll(data.delta);
 	}
 
-	public void OnEndDrag(PointerEventData data)
-	{
-		roomManager.addState = RoomManager.AddFloorState.undefined;
-	}
+//	public void OnEndDrag(PointerEventData data)
+//	{
+//		EndTouch();
+//	}
 
 	public void OnPointerUp(PointerEventData data)
 	{
-		roomManager.addState = RoomManager.AddFloorState.undefined;
+		EndTouch();
+	}
+
+	public void OnPointerDown(PointerEventData data)
+	{
+		StartTouch();
 	}
 
 	public void StartTouch()
 	{
-		touching = true;
-
+		if ( touching == false ) 
+		{ 
+			touching = true;
+		}
 		ClickThisTile();
-
-		group.blocksRaycasts = false;
 	}
 
 	public void EndTouch()
 	{
 		touching = false;
-
-		group.blocksRaycasts = true;
+		roomManager.ResetAddFloorState();
 	}
 }

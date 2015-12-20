@@ -17,3 +17,6 @@
 /Users/JeffMills/Unity/MasterMap/Temp/bin/Debug/Unity.CecilTools.dll
 /Users/JeffMills/Unity/MasterMap/Temp/bin/Debug/Mono.Cecil.Pdb.dll
 /Users/JeffMills/Unity/MasterMap/Temp/bin/Debug/Mono.Cecil.Mdb.dll
+/Users/JeffMills/Unity/MasterMap/Temp/bin/Debug/DOTween43.dll
+/Users/JeffMills/Unity/MasterMap/Temp/bin/Debug/DOTween46.dll
+/Users/JeffMills/Unity/MasterMap/Temp/bin/Debug/DOTween50.dll
