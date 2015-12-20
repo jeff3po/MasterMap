@@ -61,6 +61,20 @@ public class DrawingPanel : ControlPanelSubpanel
 		}
 	}
 
+	public void RoomUp()
+	{
+		int newRoomIndex = map.RoomShift(1);
+		newRoomIndex++;
+		roomName.text = roomPicker.options[newRoomIndex].text;
+	}
+
+	public void RoomDown()
+	{
+		int newRoomIndex = map.RoomShift(-1);
+		newRoomIndex++;
+		roomName.text = roomPicker.options[newRoomIndex].text;
+	}
+
 	public void PickRoom()
 	{
 		// First entry is hardcoded as None

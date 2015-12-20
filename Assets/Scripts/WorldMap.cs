@@ -6,13 +6,22 @@ using System.Collections.Generic;
 
 public class WorldMap : MonoBehaviour, IScrollHandler
 {
+	public Sprite gridFrame;
+	public Sprite gridlessFrame;
+
 	public RectTransform mapScroller;
+	public RectTransform mapZoomer;
 	public Image mapBG;
 	public FloorTile floorTileTemplate;
 	public Scrollbar zoomBar;
 	public ControlPanel controlPanel;
 
+	public Image gridHoriTemplate;
+	public Image gridVertTemplate;
+
 	public Door doorTemplate;
+
+	public List<FloorTile> allTiles = new List<FloorTile>();
 
 	public List<Room> rooms = new List<Room>();
 
@@ -80,22 +89,50 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 
 				newTile.transform.SetParent ( floorTileTemplate.transform.parent );
 				newTile.transform.localScale = Vector3.one;
-				newTile.transform.localPosition = new Vector3 ( (tileWidth/2) + (tileWidth * x), (tileHeight/2)+(tileHeight * y), 0 );
+				newTile.transform.localPosition = new Vector3 ( (tileWidth) + (tileWidth * x), (tileHeight)+(tileHeight * y), 0 );
 				newTile.Setup ( this, x, y );
 				newTile.name = x+"_"+y;
 				worldGrid[x,y] = newTile;
+				newTile.transform.SetAsFirstSibling();
+				allTiles.Add ( newTile );
 			}
 		}
 
 		mapSize = mapBG.rectTransform.sizeDelta;
 		targetScrollPos.x = -mapSize.x/2;
 		targetScrollPos.y = -mapSize.y/2;
+
+		for ( int x=0;x<columnCount;x++)
+		{
+			Image line = Instantiate ( gridVertTemplate );
+			line.transform.SetParent ( gridVertTemplate.transform.parent );
+			line.transform.localScale = Vector3.one;
+		}
+
+		for ( int y=0;y<rowCount;y++)
+		{
+			Image line = Instantiate ( gridHoriTemplate );
+			line.transform.SetParent ( gridHoriTemplate.transform.parent );
+			line.transform.localScale = Vector3.one;
+		}
 	}
 
 	public Vector2 mapSize;
 
 	void Update()
 	{
+//		// Keep pivot of zoomer under the mouse cursor
+//		// TODO: use pinch zoom to set when multitouch
+//		Vector3 mousePos = Input.mousePosition;
+//		mousePos.x /= Screen.width;
+//		mousePos.y /= Screen.height;
+//
+//		mapZoomer.pivot = (Vector2)mousePos;
+//		Vector2 unpivot = mousePos;
+//		unpivot.x = 1-unpivot.x;
+//		unpivot.y = 1-unpivot.y;
+//		mapScroller.pivot = (Vector2)unpivot;
+
 		float scrollJump = 64.0f;
 		if ( Input.GetKeyDown(KeyCode.UpArrow)) { targetScrollPos += Vector3.up * scrollJump; }
 		if ( Input.GetKeyDown(KeyCode.DownArrow)) { targetScrollPos += Vector3.down * scrollJump; }
@@ -126,7 +163,7 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 
 	void Zoom ( bool updateZoomBar=true )
 	{
-		mapScroller.localScale = Vector3.one * zoomFactor;
+		mapZoomer.localScale = Vector3.one * zoomFactor;
 
 		if ( updateZoomBar )
 		{
@@ -165,13 +202,63 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 	{
 		Room newRoom = new Room(rooms.Count,this);
 		newRoom.name = "Roomname_"+rooms.Count;
+		controlPanel.visPanel.AddRoomToggle ( rooms.Count, newRoom.roomColor);
 		rooms.Add ( newRoom );
 		SetCurrentRoom ( newRoom );
+	}
+
+	public int RoomShift ( int dir )
+	{
+		int currentIndex = GetRoomIndex(currentRoom);
+		int newIndex = currentIndex + dir;
+		if ( newIndex >= rooms.Count )
+		{
+			// Either end of list. No change
+			return currentIndex;
+		}
+		else
+		if ( newIndex < 0 )
+		{
+			SetCurrentRoom ( null );
+			return -1;
+		}
+
+		SetCurrentRoom ( newIndex );
+
+		return newIndex;
+	}
+
+	public int GetRoomIndex ( Room room )
+	{
+		if ( room == null ) { return -1; }
+
+		for ( int i=0;i<rooms.Count;i++)
+		{
+			if ( room == rooms[i] )
+			{
+				return i;
+			}
+		}
+
+		Debug.LogWarning ( "Can't find room "+room.name+"!" );
+		return -1;
 	}
 
 	public void SetCurrentRoom ( Room room )
 	{
 		currentRoom = room;
+
+		foreach ( FloorTile t in allTiles )
+		{
+		if ( room != null )
+			{
+				t.floorImage.sprite = gridFrame;
+			}
+			else
+			{
+				t.floorImage.sprite = gridlessFrame;
+			}
+		}
 
 		foreach ( Room r in rooms )
 		{
@@ -211,7 +298,7 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 	public void ClickThisTile ( FloorTile tile )
 	{
 		// Depending on current mode, reaction to touching a tile can be very different
-//		Debug.Log ( "Clicked "+tile.name);
+		//		Debug.Log ( "Clicked "+tile.name);
 		if ( controlPanel.CanDrag ) { return; }
 		if ( addState == AddFloorState.invalid ) { return; }
 
