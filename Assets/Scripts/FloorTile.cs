@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 
 public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScrollHandler, IEndDragHandler, IPointerUpHandler
 {
+	public RoomManager roomManager;
 	public Image floorImage;
 	public CanvasGroup group;
 	public int xPos;
@@ -79,6 +80,7 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 
 	void ClickThisTile()
 	{
+		// Go thorugh map first. It filters out the current state of everything
 		map.ClickThisTile(this);
 	}
 
@@ -107,12 +109,12 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 
 	public void OnEndDrag(PointerEventData data)
 	{
-		map.addState = WorldMap.AddFloorState.undefined;
+		roomManager.addState = RoomManager.AddFloorState.undefined;
 	}
 
 	public void OnPointerUp(PointerEventData data)
 	{
-		map.addState = WorldMap.AddFloorState.undefined;
+		roomManager.addState = RoomManager.AddFloorState.undefined;
 	}
 
 	public void StartTouch()

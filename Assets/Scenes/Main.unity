@@ -897,6 +897,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8323aba228fec44cc8d67509cf905786, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  roomManager:
+    map: {fileID: 0}
+    rooms: []
+    doorTemplate: {fileID: 0}
+    allTiles: []
+    addState: 0
+    floorTileTemplate: {fileID: 0}
+    gridFrame: {fileID: 0}
+    gridlessFrame: {fileID: 0}
+    floorTileSize: {x: 0, y: 0}
   floorImage: {fileID: 198570655}
   group: {fileID: 198570659}
   xPos: 0
@@ -5615,19 +5625,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9ee82a910154445c877fb218c1247b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridFrame: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  gridlessFrame: {fileID: 21300000, guid: 434efa30717f549fdae9e18f5a67904c, type: 3}
+  roomManager:
+    map: {fileID: 1623060728}
+    rooms: []
+    doorTemplate: {fileID: 1735419994}
+    allTiles: []
+    addState: 0
+    floorTileTemplate: {fileID: 198570657}
+    gridFrame: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+    gridlessFrame: {fileID: 21300000, guid: 434efa30717f549fdae9e18f5a67904c, type: 3}
+    floorTileSize: {x: 0, y: 0}
+  mapBG: {fileID: 1623060726}
   mapScroller: {fileID: 63519455}
   mapZoomer: {fileID: 250362357}
-  mapBG: {fileID: 1623060726}
-  floorTileTemplate: {fileID: 198570657}
   zoomBar: {fileID: 1723262190}
   controlPanel: {fileID: 1196295726}
-  gridHoriTemplate: {fileID: 613374171}
-  gridVertTemplate: {fileID: 672833309}
-  doorTemplate: {fileID: 1735419994}
-  allTiles: []
-  rooms: []
   columnCount: 40
   rowCount: 30
   maxZoom: 5
@@ -5635,7 +5647,6 @@ MonoBehaviour:
   targetScrollPos: {x: 0, y: 0, z: 0}
   editMode: 0
   mapSize: {x: 0, y: 0}
-  addState: 0
 --- !u!1 &1641730024
 GameObject:
   m_ObjectHideFlags: 0

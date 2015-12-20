@@ -23,7 +23,7 @@ public class DrawingPanel : ControlPanelSubpanel
 		List<Dropdown.OptionData> data = new List<Dropdown.OptionData>();
 		data.Add ( new Dropdown.OptionData ( "None" ) );
 		string current = "";
-		foreach ( Room r in map.rooms )
+		foreach ( Room r in map.roomManager.rooms )
 		{
 			data.Add ( new Dropdown.OptionData ( r.name ) );
 			current = r.name;

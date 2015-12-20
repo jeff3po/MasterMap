@@ -6,24 +6,29 @@ using System.Collections.Generic;
 
 public class WorldMap : MonoBehaviour, IScrollHandler
 {
-	public Sprite gridFrame;
-	public Sprite gridlessFrame;
+	public RoomManager roomManager;
 
-	public RectTransform mapScroller;
-	public RectTransform mapZoomer;
 	public Image mapBG;
-	public FloorTile floorTileTemplate;
+
+	/// <summary>
+	/// Screen navigation - scrolling
+	/// </summary>
+	public RectTransform mapScroller;
+
+	/// <summary>
+	/// Screen navigation - zooming
+	/// </summary>
+	public RectTransform mapZoomer;
+
+	/// <summary>
+	///  For one-finger zooming
+	/// </summary>
 	public Scrollbar zoomBar;
+
+	/// <summary>
+	/// Bottom bar UI
+	/// </summary>
 	public ControlPanel controlPanel;
-
-	public Image gridHoriTemplate;
-	public Image gridVertTemplate;
-
-	public Door doorTemplate;
-
-	public List<FloorTile> allTiles = new List<FloorTile>();
-
-	public List<Room> rooms = new List<Room>();
 
 	FloorTile[,] worldGrid;
 
@@ -56,7 +61,7 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 
 	void Start()
 	{
-		doorTemplate.gameObject.SetActive ( false );
+		roomManager.Init();
 
 		// Define a standard pallete of colors
 		for ( int r=0;r<3;r++)
@@ -70,69 +75,44 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 				}
 			}
 		}
-
+		// End with pure white
 		globalColors.Add ( new Color(1,1,1));
-		floorTileTemplate.gameObject.SetActive ( false );
 
+		// Build the world according to specs
 		worldGrid = new FloorTile[columnCount,rowCount];
 
-		float tileWidth = floorTileTemplate.floorImage.rectTransform.sizeDelta.x;
-		float tileHeight = floorTileTemplate.floorImage.rectTransform.sizeDelta.y;
+		Vector2 tilesize = roomManager.floorTileSize;
+		float tileWidth = tilesize.x;
+		float tileHeight = tilesize.y;
 
 		// Floor tile template starts centered in world. Build out then center
 		for ( int x=0;x<columnCount;x++ )
 		{
 			for ( int y=0;y<rowCount;y++)
 			{
-				FloorTile newTile = Instantiate ( floorTileTemplate );
+				FloorTile newTile = Instantiate ( roomManager.floorTileTemplate );
 				newTile.gameObject.SetActive ( true );
 
-				newTile.transform.SetParent ( floorTileTemplate.transform.parent );
+				newTile.transform.SetParent ( roomManager.floorTileTemplate.transform.parent );
 				newTile.transform.localScale = Vector3.one;
 				newTile.transform.localPosition = new Vector3 ( (tileWidth) + (tileWidth * x), (tileHeight)+(tileHeight * y), 0 );
 				newTile.Setup ( this, x, y );
 				newTile.name = x+"_"+y;
 				worldGrid[x,y] = newTile;
 				newTile.transform.SetAsFirstSibling();
-				allTiles.Add ( newTile );
+				roomManager.allTiles.Add ( newTile );
 			}
 		}
 
 		mapSize = mapBG.rectTransform.sizeDelta;
 		targetScrollPos.x = -mapSize.x/2;
 		targetScrollPos.y = -mapSize.y/2;
-
-		for ( int x=0;x<columnCount;x++)
-		{
-			Image line = Instantiate ( gridVertTemplate );
-			line.transform.SetParent ( gridVertTemplate.transform.parent );
-			line.transform.localScale = Vector3.one;
-		}
-
-		for ( int y=0;y<rowCount;y++)
-		{
-			Image line = Instantiate ( gridHoriTemplate );
-			line.transform.SetParent ( gridHoriTemplate.transform.parent );
-			line.transform.localScale = Vector3.one;
-		}
 	}
 
 	public Vector2 mapSize;
 
 	void Update()
 	{
-//		// Keep pivot of zoomer under the mouse cursor
-//		// TODO: use pinch zoom to set when multitouch
-//		Vector3 mousePos = Input.mousePosition;
-//		mousePos.x /= Screen.width;
-//		mousePos.y /= Screen.height;
-//
-//		mapZoomer.pivot = (Vector2)mousePos;
-//		Vector2 unpivot = mousePos;
-//		unpivot.x = 1-unpivot.x;
-//		unpivot.y = 1-unpivot.y;
-//		mapScroller.pivot = (Vector2)unpivot;
-
 		float scrollJump = 64.0f;
 		if ( Input.GetKeyDown(KeyCode.UpArrow)) { targetScrollPos += Vector3.up * scrollJump; }
 		if ( Input.GetKeyDown(KeyCode.DownArrow)) { targetScrollPos += Vector3.down * scrollJump; }
@@ -146,6 +126,9 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 		delta *= Time.deltaTime * 9.0f;
 		mapScroller.localPosition += delta;
 	}
+
+
+	// - - - S C R E E N   N A V I G A T I O N - - - -
 
 	public void Scroll ( Vector2 scroll )
 	{
@@ -178,120 +161,45 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 	}
 
 
+
+
+	// - - -  R O O M   M A N A G E M E N T  - - - -
+
 	public void SetRoomVisibility ( int index, bool vis )
 	{
-		rooms[index].SetVisible ( vis );
-
-		// Go back through all doors and turn their tiles back on if either of their rooms is active
-		foreach ( Room r in rooms )
-		{
-			if ( r.isVisible == false ) { continue; }
-			foreach ( FloorTile t in r.tiles )
-			{
-				if ( t.isDoor )
-				{
-					t.SetVisible ( true );
-				}
-			}
-		}
+		roomManager.SetRoomVisibility (index, vis);
 	}
-
-	Room currentRoom = null;
 
 	public void AddRoom()
 	{
-		Room newRoom = new Room(rooms.Count,this);
-		newRoom.name = "Roomname_"+rooms.Count;
-		controlPanel.visPanel.AddRoomToggle ( rooms.Count, newRoom.roomColor);
-		rooms.Add ( newRoom );
-		SetCurrentRoom ( newRoom );
+		roomManager.AddRoom();
 	}
 
 	public int RoomShift ( int dir )
 	{
-		int currentIndex = GetRoomIndex(currentRoom);
-		int newIndex = currentIndex + dir;
-		if ( newIndex >= rooms.Count )
-		{
-			// Either end of list. No change
-			return currentIndex;
-		}
-		else
-		if ( newIndex < 0 )
-		{
-			SetCurrentRoom ( null );
-			return -1;
-		}
-
-		SetCurrentRoom ( newIndex );
-
-		return newIndex;
-	}
-
-	public int GetRoomIndex ( Room room )
-	{
-		if ( room == null ) { return -1; }
-
-		for ( int i=0;i<rooms.Count;i++)
-		{
-			if ( room == rooms[i] )
-			{
-				return i;
-			}
-		}
-
-		Debug.LogWarning ( "Can't find room "+room.name+"!" );
-		return -1;
+		return roomManager.RoomShift(dir);
 	}
 
 	public void SetCurrentRoom ( Room room )
 	{
-		currentRoom = room;
-
-		foreach ( FloorTile t in allTiles )
-		{
-		if ( room != null )
-			{
-				t.floorImage.sprite = gridFrame;
-			}
-			else
-			{
-				t.floorImage.sprite = gridlessFrame;
-			}
-		}
-
-		foreach ( Room r in rooms )
-		{
-			if ( room == null )
-			{
-				r.SetVisible ( true );
-			}
-			else
-			if ( r != currentRoom )
-			{
-				r.SetVisible ( false, true );
-			}
-			else
-			{
-				r.SetVisible ( true );
-			}
-		}
+		roomManager.SetCurrentRoom(room);
 	}
 
 	public bool SetCurrentRoomName ( string nm )
 	{
-		if (currentRoom == null ) { return false; }
-		currentRoom.name = nm;
-		return true;
+		return roomManager.SetCurrentRoomName ( nm );
 	}
 
 	public Room SetCurrentRoom ( int roomID )
 	{
-		Room r = rooms[roomID];
-		SetCurrentRoom ( r );
-		return r;
+		return roomManager.SetCurrentRoom(roomID);
 	}
 
+
+
+
+
+	// - - -  I N T E R A C T I O N  - - - 
 	/// <summary>
 	/// TODO: FSM to manage all the different modes
 	/// </summary>
@@ -299,324 +207,10 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 	{
 		// Depending on current mode, reaction to touching a tile can be very different
 		//		Debug.Log ( "Clicked "+tile.name);
+
+		// Dragging instead of manipulating 
 		if ( controlPanel.CanDrag ) { return; }
-		if ( addState == AddFloorState.invalid ) { return; }
 
-		if ( currentRoom == null ) { return; }
-
-		if ( addState == AddFloorState.undefined || addState == AddFloorState.Removing)
-		{
-			if ( currentRoom.tiles.Contains ( tile ) )
-			{
-				// Already exists, so toggle to remove mode and pull it out
-				addState = AddFloorState.Removing;
-				if ( tile.isDoor )
-				{
-					tile.isDoor = false;
-					Debug.Log ( "Destroying "+tile.attachedDoor.name );
-					Destroy ( tile.attachedDoor.gameObject );
-				}
-				currentRoom.RemoveFloorTile ( tile );
-				// Reset current room to fix underlying room's version of this tile
-				SetCurrentRoom ( currentRoom );
-				return;
-			}
-		}
-
-		Room otherRoom = null;
-
-		// Automatically insert a door on valid tiles shared by exactly two rooms
-		foreach ( Room r in rooms )
-		{
-			if ( r == currentRoom ) { continue; }
-
-			if ( r.tiles.Contains ( tile ) )
-			{
-				if ( otherRoom != null )
-				{
-					Debug.LogError ( "Too many overlapping rooms to add door to "+tile.name );
-				}
-				else
-				{
-					otherRoom = r;
-				}
-			}
-		}
-
-		// If overlapping other room, must be adjacent to at least one non-door tile within current room
-		// I.e. can't drop a single tile in the center of another room.
-		List<FloorTile> fromRoom = currentRoom.GetAdjacent(tile, true, false);
-
-		// If not overllaping (or overlapping in a way that can make a door), go ahead and add it
-		if ( otherRoom == null || fromRoom.Count > 0 )
-		{
-			if ( addState == AddFloorState.undefined || addState == AddFloorState.Adding)
-			{
-				addState = AddFloorState.Adding;
-				currentRoom.AddFloorTile ( tile );
-			}
-		}
-
-		if ( otherRoom != null && fromRoom.Count > 0)
-		{
-			// HACK! For the moment, a door can only be placed in a single tile that merges two rooms
-			List<FloorTile> axiallyAligned = otherRoom.GetAdjacent(tile, true, false);
-			axiallyAligned.AddRange ( currentRoom.GetAdjacent(tile,true,false) );
-
-			if (axiallyAligned.Count == 2 )
-			{
-				// Perfect for door. Temporarily remove this tile, 
-				// reevaluate the rooms to split them then add the tile back to both rooms with the door flag
-
-				// Add door only once
-				if ( tile.isDoor == false )
-				{
-					tile.isDoor = true;
-
-					Door newDoor = Instantiate ( doorTemplate );
-					newDoor.gameObject.SetActive ( true );
-					newDoor.transform.SetParent( tile.transform);
-					newDoor.transform.localScale = Vector3.one;
-					newDoor.transform.localPosition = Vector3.zero;
-					tile.attachedDoor = newDoor;
-					newDoor.name = "Door_"+tile.name+" "+currentRoom.name+" -> "+otherRoom.name;
-					Debug.Log ( "Adding "+newDoor.name );
-					// Once a door has been added, no more drawing on this stroke
-					addState = AddFloorState.invalid;
-
-					if ( axiallyAligned[0].yPos != tile.yPos)
-					{
-						// Vertically aligned, so rotate door to match
-						newDoor.transform.localRotation = Quaternion.Euler ( new Vector3 ( 0,0,90));
-					}
-				}
-			}
-			else
-			{
-				// No non-door overlaps allowed. Take it back!
-				currentRoom.RemoveFloorTile ( tile );
-				addState = AddFloorState.invalid;
-				SetCurrentRoom ( currentRoom );
-			}
-		}
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-	// --- F R E E - D R A W   A U T O - R O O M - G E N E R A T I N G ---
-
-	public enum AddFloorState
-	{
-		undefined,
-		Adding,
-		Removing,
-		invalid // Attempting to overlap rooms at points other than doors interrupts drawing
-	}
-
-	public AddFloorState addState = AddFloorState.undefined;
-
-	public void DrawOnThisTile( FloorTile tile )
-	{
-		// If in drag mode, no can edit
-		if ( controlPanel.CanDrag )
-		{
-			return;
-		}
-
-		if ( editMode == EditMode.Room )
-		{
-			// Which room mode are we in?
-			if ( controlPanel.drawingPanelMode == ControlPanel.DrawingPanelMode.Floor )
-			{
-				AddToAdjacentRoom ( tile );
-			}
-			else
-				if ( controlPanel.drawingPanelMode == ControlPanel.DrawingPanelMode.Door )
-				{
-					DivideRoom ( tile );
-				}
-		}
-		else
-			if ( editMode == EditMode.Decoration )
-			{
-				// TODO: Add decoration accoriding to button selected in panel	
-			}
-	}
-
-	public void DivideRoom ( FloorTile tile )
-	{
-		FloorTile doorTile = null;
-		// Must be touching exising floor tile, and it must have exactly two adjacent tiles axially aligned
-		foreach ( Room r in rooms )
-		{
-			if ( r.tiles.Contains ( tile ) )
-			{
-				// HACK! For the moment, a door can only be placed in a single tile that merges two rooms
-				List<FloorTile> axiallyAligned = r.GetAdjacent(tile, true);
-
-				if (axiallyAligned.Count == 2 )
-				{
-					// Perfect for door. Temporarily remove this tile, 
-					// reevaluate the rooms to split them then add the tile back to both rooms with the door flag
-					doorTile = tile;
-					doorTile.isDoor = true;
-					r.RemoveFloorTile(tile);
-					ReevaluateMap();
-
-					Door newDoor = Instantiate ( doorTemplate );
-					newDoor.gameObject.SetActive ( true );
-					newDoor.transform.SetParent( doorTile.transform);
-					newDoor.transform.localScale = Vector3.one;
-					newDoor.transform.localPosition = Vector3.zero;
-					if ( axiallyAligned[0].yPos != doorTile.yPos)
-					{
-						// Vertically aligned, so rotate door to match
-						newDoor.transform.localRotation = Quaternion.Euler ( new Vector3 ( 0,0,90));
-					}
-
-					// Re-add to every possible adjacent 
-					//(should only be the two divided by this door accoring to axiallyAligned check above)
-					foreach ( Room newroom in rooms )
-					{
-						if ( newroom.IsAdajcent ( doorTile ))
-						{
-							newroom.AddFloorTile ( doorTile );
-						}
-					}
-				}
-				break;
-			}
-		}
-	}
-
-	public void AddToAdjacentRoom ( FloorTile tile )
-	{
-		// If a door has been set, the tile's room can't be altered
-		if ( tile.isDoor ) { return; }
-
-		// Clicking within an existing room toggles it
-		if ( addState == AddFloorState.undefined || addState == AddFloorState.Removing)
-		{
-			bool reevaluate = false;
-			foreach ( Room r in rooms )
-			{
-				if ( r.tiles.Contains ( tile ) )
-				{
-					addState = AddFloorState.Removing;
-					r.RemoveFloorTile(tile);
-					tile.SetColor ( Color.white );
-					reevaluate = true;
-					break;
-				}
-			}
-			if ( reevaluate )
-			{
-				ReevaluateMap();
-				return;
-			}
-		}
-
-		if ( addState == AddFloorState.undefined || addState == AddFloorState.Adding )
-		{
-			List<Room> adjacentRooms = new List<Room>();
-			foreach ( Room r in rooms )
-			{
-				if ( r.IsAdajcent(tile,true) )
-				{
-					addState = AddFloorState.Adding;
-					adjacentRooms.Add ( r );
-				}
-			}
-
-			if ( adjacentRooms.Count == 1 )
-			{
-				Room r = adjacentRooms[0];
-				r.AddFloorTile ( tile );
-				return;
-			}
-			else
-				if ( adjacentRooms.Count > 1 )
-				{
-					Room r = adjacentRooms[0];
-					r.AddFloorTile ( tile );
-					for ( int i=1;i<adjacentRooms.Count;i++)
-					{
-						Room otherRoom = adjacentRooms[i];
-						foreach ( FloorTile t in otherRoom.tiles )
-						{
-							r.AddFloorTile(t);
-						}
-					}
-					// Clear out the latters from the main room list
-					while ( adjacentRooms.Count > 1 )
-					{
-						rooms.Remove ( adjacentRooms[1] );
-						adjacentRooms.RemoveAt(1);
-					}
-
-					ResetVisPanel();
-
-					return;
-				}
-
-			Room newRoom = new Room(rooms.Count,this);
-			controlPanel.visPanel.AddRoomToggle ( rooms.Count, newRoom.roomColor);
-			rooms.Add( newRoom );
-			addState = AddFloorState.Adding;
-			newRoom.AddFloorTile( tile );
-			ResetVisPanel();
-		}
-	}
-
-	void ResetVisPanel()
-	{
-		// Go in reverse order to wipe out empty room definitions
-		for ( int i=rooms.Count-1;i>=0;i--)
-		{
-			if ( rooms[i].tiles.Count == 0 )
-			{
-				rooms.RemoveAt ( i );
-			}
-		}
-
-		controlPanel.visPanel.Reset();
-
-		for ( int i=0;i<rooms.Count;i++)
-		{
-			controlPanel.visPanel.AddRoomToggle ( i, rooms[i].roomColor );
-		}
-	}
-
-	void ReevaluateMap()
-	{
-		controlPanel.visPanel.Reset();
-
-		// If we remove a tile, we'll fill this list and re-evaluate the entire map
-		List<FloorTile> allActiveTiles = new List<FloorTile>();
-		foreach ( Room r in rooms )
-		{
-			foreach ( FloorTile t in r.tiles )
-			{
-				allActiveTiles.Add ( t );
-			}
-		}
-
-		// Go through re-adding all the tiles as though we're starting from scratch
-		rooms.Clear();
-
-		foreach ( FloorTile t in allActiveTiles )
-		{
-			addState = AddFloorState.Adding;
-			AddToAdjacentRoom(t);
-		}
+		roomManager.InteractWithFloorTile ( tile );
 	}
 }

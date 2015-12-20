@@ -12,15 +12,18 @@ public class Room
 
 	public Color roomColor = Color.white;
 	public string name;
-	public WorldMap worldMap;
+	WorldMap worldMap;
 
 	public Room ( int index, WorldMap map )
 	{
-		worldMap = map;
 		name = "Room"+index;
 		roomColor = map.globalColors[index];
+		worldMap = map;
 	}
 
+	/// <summary>
+	/// All the tiles that make up this room
+	/// </summary>
 	public List<FloorTile> tiles = new List<FloorTile>();
 
 	public void SetVisible ( bool vis, bool semitransparent = false )
