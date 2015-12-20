@@ -23,17 +23,21 @@ public class Room
 
 	public List<FloorTile> tiles = new List<FloorTile>();
 
-	public void SetVisible ( bool vis )
+	public void SetVisible ( bool vis, bool semitransparent = false )
 	{
 		isVisible = vis;
 		foreach ( FloorTile t in tiles )
 		{
-			t.SetVisible ( vis );
+			if ( semitransparent )
+			{
+				t.SetAlpha ( 0.2f );
+			}
+			else
+			{
+				t.SetVisible ( vis );
+				t.SetAlpha ( 1.0f );
+			}
 		}
-	}
-	public void RemoveFloorTile ( FloorTile tile )
-	{
-		tiles.Remove ( tile );
 	}
 
 	public bool IsAdajcent(FloorTile tile, bool ignoreDoors=false)
@@ -51,12 +55,13 @@ public class Room
 	/// <summary>
 	/// AxialOnly ignores diagonals 
 	/// </summary>
-	public List<FloorTile> GetAdjacent ( FloorTile tile, bool axialOnly )
+	public List<FloorTile> GetAdjacent ( FloorTile tile, bool axialOnly, bool allowDoors=true )
 	{
 		List<FloorTile> adjs = new List<FloorTile>();
 		foreach (FloorTile t in tiles )
 		{
 			if ( t == tile ) { continue; }
+			if ( t.isDoor && allowDoors==false ) { continue; }
 			int deltaX = Mathf.Abs (t.xPos - tile.xPos);
 			int deltaY = Mathf.Abs (t.yPos - tile.yPos);
 			if ( deltaX + deltaY <= 1 ) { adjs.Add ( t ); }
@@ -69,7 +74,13 @@ public class Room
 		if ( tiles.Contains (tile) == false )
 		{
 			tiles.Add ( tile );
-			tile.SetColor ( roomColor );
+			tile.AddToRoom(this);
 		}
+	}
+
+	public void RemoveFloorTile ( FloorTile tile )
+	{
+		tiles.Remove ( tile );
+		tile.RemoveFromRoom ( this );
 	}
 }

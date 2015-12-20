@@ -11,15 +11,46 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 	public int xPos;
 	public int yPos;
 	public Color color;
-
+	public Door attachedDoor = null;
 	public bool isDoor = false;
+
+	List<Room> owningRooms = new List<Room>();
 
 	WorldMap map;
 	static bool touching = false;
 
+	public void AddToRoom ( Room r )
+	{
+		if ( owningRooms.Contains ( r ) == false)
+		{
+			owningRooms.Add ( r );
+		}
+		SetColor ( r.roomColor );
+	}
+
+	public void RemoveFromRoom ( Room r )
+	{
+		owningRooms.Remove ( r );
+		if ( owningRooms.Count > 0 )
+		{
+			SetColor ( owningRooms[0].roomColor );
+		}
+		else
+		{
+			SetColor ( Color.white );
+		}
+	}
+
 	public void SetVisible ( bool vis )
 	{
 		gameObject.SetActive ( vis );
+	}
+
+	public void SetAlpha ( float a )
+	{
+		Color c = floorImage.color;
+		c.a = a;
+		floorImage.color = c;
 	}
 
 	public void Setup ( WorldMap m, int x, int y )
@@ -35,7 +66,7 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 		{
 			if ( touching )
 			{
-				DrawHere();
+				ClickThisTile();
 			}
 		}
 	}
@@ -46,17 +77,16 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 		floorImage.color = c;
 	}
 
-	void DrawHere()
+	void ClickThisTile()
 	{
-		// Can draw!
-		map.DrawOnThisTile(this);
+		map.ClickThisTile(this);
 	}
 
 	public void OnPointerEnter(PointerEventData data)
 	{
 		if ( touching )
 		{
-			DrawHere();
+			ClickThisTile();
 		}
 	}
 
@@ -89,7 +119,7 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 	{
 		touching = true;
 
-		DrawHere();
+		ClickThisTile();
 
 		group.blocksRaycasts = false;
 	}

@@ -41,14 +41,18 @@ public class ControlPanel : MonoBehaviour
 	public InsertDecoration decorationMode = InsertDecoration.None;
 	void Start()
 	{
+		Application.targetFrameRate = 30;
+		QualitySettings.vSyncCount = -1;
+
 		toggleLockDrag.isOn = _canDrag;
 		List<string>optionNames = new List<string> ( System.Enum.GetNames ( typeof(WorldMap.EditMode)) );
 		editModeDropdown.AddOptions( optionNames );
 		Open ( true );
 		_controlPanelClosed = Vector2.zero;
 		_controlPanelClosed.x -= frame.rectTransform.sizeDelta.x - OpenButton_ToOpen.image.rectTransform.sizeDelta.x;
-		drawingPanel.AddButton ( "Draw Floors", DrawRooms );
-		drawingPanel.AddButton ( "Set Doors", SetDoors );
+
+		drawingPanel.AddButton ( "Floors", DrawRooms );
+		drawingPanel.AddButton ( "Doors", SetDoors );
 
 		decorationPanel.AddButton ( "No deco", AddDeco_None );
 		decorationPanel.AddButton ( "Add pillar", AddDeco_Pillar );
