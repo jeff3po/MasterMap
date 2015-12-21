@@ -37,6 +37,7 @@ public class ControlPanel : MonoBehaviour
 
 	public DrawingPanel drawingPanel;
 	public DecorationPanel decorationPanel;
+	public GameObject playPanel;
 
 	public InsertDecoration decorationMode = InsertDecoration.None;
 	void Start()
@@ -78,12 +79,19 @@ public class ControlPanel : MonoBehaviour
 			map.SetEditMode ( WorldMap.EditMode.Room );
 			ShowPanel ( WorldMap.EditMode.Room );
 		}
+		else
+		if ( option == "Play")
+		{
+			map.SetEditMode ( WorldMap.EditMode.Play );
+			ShowPanel ( WorldMap.EditMode.Play );
+		}
 	}
 
 	public void ShowPanel ( WorldMap.EditMode mode )
 	{
 		drawingPanel.gameObject.SetActive ( false );
 		decorationPanel.gameObject.SetActive ( false );
+		playPanel.gameObject.SetActive ( false );
 		// TODO: Hide all other panels
 
 		if ( mode == WorldMap.EditMode.Room )
@@ -94,6 +102,11 @@ public class ControlPanel : MonoBehaviour
 		if ( mode == WorldMap.EditMode.Deco )
 		{
 			decorationPanel.gameObject.SetActive ( true );
+		}
+		else
+		if ( mode == WorldMap.EditMode.Play )
+		{
+			playPanel.gameObject.SetActive ( true );
 		}
 	}
 

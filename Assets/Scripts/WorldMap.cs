@@ -7,6 +7,10 @@ using SimpleJSON;
 
 public class WorldMap : MonoBehaviour, IScrollHandler
 {
+	public InfoPanel infoPanel;
+
+	public RectTransform tokenLayer;
+
 	public RoomManager roomManager;
 
 	public Image mapBG;
@@ -50,9 +54,9 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 
 	public enum EditMode
 	{
-		Room,
-		Deco,
-		Play
+		Room, // Floors and doors setup
+		Deco, // Stationary tokens setup
+		Play  // Moving tokens with visibility and movement rules
 	}
 
 	public EditMode editMode = EditMode.Room;
@@ -113,6 +117,24 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 		targetScrollPos.y = -mapSize.y/2;
 	}
 
+	public FloorTile FindClosestTile ( Vector3 worldPos )
+	{
+		// TODO: More elegant than this
+		float closestDist = 999999;
+		FloorTile closestTile = null;
+		foreach ( FloorTile t in roomManager.allTiles )
+		{
+			float distFromTile = ( t.transform.position - worldPos ).magnitude;
+			if ( distFromTile < closestDist )
+			{
+				closestDist = distFromTile;
+				closestTile = t;
+			}
+		}
+
+		return closestTile;
+	}
+
 	void Update()
 	{
 		float scrollJump = 64.0f;
@@ -121,8 +143,8 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 		if ( Input.GetKeyDown(KeyCode.LeftArrow)) { targetScrollPos += Vector3.left * scrollJump; }
 		if ( Input.GetKeyDown(KeyCode.RightArrow)) { targetScrollPos += Vector3.right * scrollJump; }
 
-		if ( targetScrollPos.x > -mapSize.x/2 ) { targetScrollPos.x = -mapSize.x/2; }
-		if ( targetScrollPos.y > -mapSize.y/2 ) { targetScrollPos.y = -mapSize.y/2; }
+//		if ( targetScrollPos.x > -mapSize.x/2 ) { targetScrollPos.x = -mapSize.x/2; }
+//		if ( targetScrollPos.y > -mapSize.y/2 ) { targetScrollPos.y = -mapSize.y/2; }
 
 		Vector3 delta = targetScrollPos - mapScroller.localPosition;
 		delta *= Time.deltaTime * 9.0f;
@@ -135,7 +157,7 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 	public void Scroll ( Vector2 scroll )
 	{
 		if ( controlPanel.CanDrag == false ) { return; }
-		targetScrollPos += (Vector3)scroll * 3.0f;
+		targetScrollPos += (Vector3)scroll * 2f / zoomFactor;
 	}
 
 	public void OnScroll(PointerEventData data)
@@ -219,6 +241,19 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 		// Dragging instead of manipulating 
 		if ( controlPanel.CanDrag ) { return; }
 
-		roomManager.InteractWithFloorTile ( tile );
+		if ( editMode == EditMode.Play )
+		{
+			// Dragging around tokens
+		}
+		else
+		if ( editMode == EditMode.Room )
+		{
+			roomManager.InteractWithFloorTile ( tile );
+		}
+		else
+		if ( editMode == EditMode.Deco )
+		{
+			// manipulate the deco level
+		}
 	}
 }
