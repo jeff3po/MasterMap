@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using SimpleJSON;
 
 /// <summary>
 /// All things reoom-related
@@ -11,6 +12,7 @@ public class RoomManager : MonoBehaviour
 	public WorldMap map;
 
 	public List<Room> rooms = new List<Room>();
+	public List<Door> doors = new List<Door>();
 
 	Room currentRoom = null;
 
@@ -176,7 +178,7 @@ public class RoomManager : MonoBehaviour
 			if ( r.isVisible == false ) { continue; }
 			foreach ( FloorTile t in r.tiles )
 			{
-				if ( t.IsDoor )
+				if ( t.IsDoorway )
 				{
 					t.SetVisible ( true );
 				}
@@ -191,7 +193,15 @@ public class RoomManager : MonoBehaviour
 	{
 		if ( currentAddFloorState == AddFloorState.invalid ) { return; }
 
-		if ( currentRoom == null ) { return; }
+		if ( currentRoom == null ) 
+		{
+			if ( tile.IsDoorway )
+			{
+				// Bring up door info, nothing else
+				map.InfoPanel ( tile.attachedDoor );
+			}
+			return; 
+		}
 
 		if ( currentAddFloorState == AddFloorState.undefined || currentAddFloorState == AddFloorState.Removing)
 		{
@@ -199,8 +209,9 @@ public class RoomManager : MonoBehaviour
 			{
 				// Already exists, so toggle to remove mode and pull it out
 				SetAddFloorState ( AddFloorState.Removing );
-				if ( tile.IsDoor )
+				if ( tile.IsDoorway )
 				{
+					doors.Remove ( tile.attachedDoor );
 					tile.RemoveDoor();
 				}
 				currentRoom.RemoveFloorTile ( tile );
@@ -256,24 +267,20 @@ public class RoomManager : MonoBehaviour
 				// reevaluate the rooms to split them then add the tile back to both rooms with the door flag
 
 				// Add door only once
-				if ( tile.IsDoor == false )
+				if ( tile.IsDoorway == false )
 				{
-					Door newDoor = GameObject.Instantiate ( doorTemplate );
-					newDoor.gameObject.SetActive ( true );
-					newDoor.transform.SetParent( tile.transform);
-					newDoor.transform.localScale = Vector3.one;
-					newDoor.transform.localPosition = Vector3.zero;
-					tile.AttachDoor ( newDoor );
-					newDoor.name = "Door_"+tile.name+" "+currentRoom.Name+" -> "+otherRoom.Name;
-//					Debug.Log ( "Adding "+newDoor.name );
 					// Once a door has been added, no more drawing on this stroke
 					SetAddFloorState ( AddFloorState.invalid );
 
+					// TODO: Figure out facing for barred doors (since they only lock in one direction)
+					Door.Facing facing = Door.Facing.East;
 					if ( axiallyAligned[0].yPos != tile.yPos)
 					{
 						// Vertically aligned, so rotate door to match
-						newDoor.transform.localRotation = Quaternion.Euler ( new Vector3 ( 0,0,90));
+						facing = Door.Facing.South;
 					}
+
+					MakeNewDoor(tile,facing);
 				}
 			}
 			else
@@ -284,6 +291,15 @@ public class RoomManager : MonoBehaviour
 				SetCurrentRoom ( currentRoom );
 			}
 		}
+	}
+
+	void MakeNewDoor ( FloorTile tile, Door.Facing facing )
+	{
+		Door newDoor = GameObject.Instantiate ( doorTemplate );
+		// TODO: Locked, barred, stuck, trapped, etc
+		newDoor.Setup ( this, tile, facing );
+
+		doors.Add ( newDoor );
 	}
 
 	bool resetAddFloor = false;
@@ -311,13 +327,109 @@ public class RoomManager : MonoBehaviour
 			SetAddFloorState ( AddFloorState.undefined );
 		}
 
-		string message = string.Format("State: {0}, touching: {1}", currentAddFloorState.ToString(), FloorTile.touching.ToString());
-		SetDebugMessage ( message );
+//		string message = string.Format("State: {0}, touching: {1}", currentAddFloorState.ToString(), FloorTile.touching.ToString());
+//		SetDebugMessage ( message );
 	}
 
 	public Text debugMessage;
-	void SetDebugMessage( string message )
+	public void SetDebugMessage( string message )
 	{
 		debugMessage.text = message;
 	}
+
+	public FloorTile FindTileByID ( string id )
+	{
+		// TODO: Change to dictionary
+		foreach ( FloorTile t in allTiles )
+		{
+			if ( t.UniqueID() == id )
+			{
+				return t;
+			}
+		}
+		Debug.LogWarning ( "Can't find tile "+id);
+		return null;
+	}
+
+
+	// - - -  A R C H I V I N G  - - - -
+
+	public void SaveAll()
+	{
+		// Some quick sanity checks before writing this out.
+		// Go in reverse order so we can cull empty groups as we go
+		for ( int i=rooms.Count-1;i>=0;i--)
+		{
+			Room r = rooms[i];
+			if ( r.tiles.Count == 0 )
+			{
+				rooms.RemoveAt(i);
+			}
+		}
+
+		// Construct the JSON version
+		string blanknode = "{\"archiveType\":\"World\"}";
+		JSONNode data = JSONNode.Parse (blanknode);
+
+		int roomCount = 0;
+		foreach ( Room r in rooms )
+		{
+			r.Export ( ref data, roomCount );
+			roomCount ++;
+		}
+		data [ "World" ] ["roomCount"].AsInt = roomCount;
+
+		// NOTE: Doors require rooms to be established first
+		int doorCount = 0;
+		foreach ( Door d in doors )
+		{
+			d.Export ( ref data, doorCount );
+			doorCount ++;
+		}
+		data [ "World" ] ["doorCount"].AsInt = doorCount;
+
+
+		string jsonstring = data.ToString();
+		PlayerPrefs.SetString ( "savefile", jsonstring );
+
+		Debug.Log ( DBDatabase.jsonToReadable ( jsonstring ) );
+	}
+
+	public void LoadAll()
+	{
+		// Wipe out any previous
+		foreach ( Room r in rooms ) { Destroy ( r.gameObject ); }
+		rooms.Clear();
+		foreach ( Door d in doors ) { Destroy ( d.gameObject ); }
+		doors.Clear();
+
+		string jsonString = PlayerPrefs.GetString ( "savefile" );
+
+		JSONNode data = JSON.Parse ( jsonString );
+		int roomCount = data [ "World" ] [ "roomCount" ].AsInt ;
+		for ( int i=0;i<roomCount;i++)
+		{
+			Room newRoom = MakeNewRoom();
+			newRoom.Init( ref data, i );
+			map.controlPanel.drawingPanel.ResetPicker();
+		}
+
+		int doorCount = data [ "World" ] [ "doorCount" ].AsInt ;
+		for ( int i=0;i<doorCount;i++)
+		{
+			Door newDoor = Instantiate ( doorTemplate );
+			newDoor.Init( ref data, i );
+			doors.Add ( newDoor );
+		}
+
+		foreach ( Room r in rooms )
+		{
+			r.PostInit();
+		}
+		foreach ( Door d in doors )
+		{
+			d.PostInit();
+		}
+	}
+
 }

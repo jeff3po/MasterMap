@@ -23,7 +23,7 @@ public class Room : Archivable
 	public override void SetupArchive()
 	{
 		base.SetupArchive();
-		Category = "Room";
+		Category = "Rooms";
 	}
 
 	public override string UniqueID()
@@ -55,7 +55,7 @@ public class Room : Archivable
 
 	public bool IsAdajcent(FloorTile tile, bool ignoreDoors=false)
 	{
-		if ( ignoreDoors && tile.IsDoor ) { return false; }
+		if ( ignoreDoors && tile.IsDoorway ) { return false; }
 		foreach ( FloorTile t in tiles )
 		{
 			int deltaX = Mathf.Abs (t.xPos - tile.xPos);
@@ -74,7 +74,7 @@ public class Room : Archivable
 		foreach (FloorTile t in tiles )
 		{
 			if ( t == tile ) { continue; }
-			if ( t.IsDoor && allowDoors==false ) { continue; }
+			if ( t.IsDoorway && allowDoors==false ) { continue; }
 			int deltaX = Mathf.Abs (t.xPos - tile.xPos);
 			int deltaY = Mathf.Abs (t.yPos - tile.yPos);
 			if ( deltaX + deltaY <= 1 ) { adjs.Add ( t ); }
@@ -98,6 +98,12 @@ public class Room : Archivable
 	}
 
 
+
+	// - - - A R C H I V E - - - - -
+
+	/// <summary>
+	/// Used only during Init to carry IDs across into postInit
+	/// </summary>
 	List<string> tileIDs = new List<string>();
 
 	public override void PostInit()
@@ -105,17 +111,8 @@ public class Room : Archivable
 		// Find matching tiles in tile list
 		foreach ( string s in tileIDs )
 		{
-			// TODO: Change to dictionary
-			foreach ( FloorTile t in roomManager.allTiles )
-			{
-				if ( t.UniqueID() == s )
-				{
-					AddFloorTile ( t );
-					break;
-				}
-			}
+			AddFloorTile ( roomManager.FindTileByID ( s ) );
 		}
-
 	}
 
 	public override void Init(ref JSONNode data, int i )

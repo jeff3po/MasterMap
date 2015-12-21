@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
-public class FloorTile : Archivable, IDragHandler, IPointerEnterHandler, IScrollHandler, IPointerUpHandler, IPointerDownHandler
+public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScrollHandler, IPointerUpHandler, IPointerDownHandler
 {
 	/// <summary>
 	/// Once any floor tile is being touched, they all know about it
@@ -39,17 +39,12 @@ public class FloorTile : Archivable, IDragHandler, IPointerEnterHandler, IScroll
 	/// <summary>
 	/// Can attach a door
 	/// </summary>
-	Door attachedDoor = null;
+	public Door attachedDoor = null;
 
-	public override void SetupArchive()
-	{
-		base.SetupArchive();
-		Category = "FloorTile";
-	}
 	/// <summary>
-	/// Is true if there's a door attached
+	/// Is true if this tile is shared between exactly two rooms
 	/// </summary>
-	public bool IsDoor
+	public bool IsDoorway
 	{
 		get { return attachedDoor != null; }
 	}
@@ -57,7 +52,7 @@ public class FloorTile : Archivable, IDragHandler, IPointerEnterHandler, IScroll
 	/// <summary>
 	/// Unique because there can be only one tile at each coordinate
 	/// </summary>
-	public override string UniqueID()
+	public string UniqueID()
 	{
 		return xPos+"-"+yPos;
 	}

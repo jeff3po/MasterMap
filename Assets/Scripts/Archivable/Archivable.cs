@@ -34,6 +34,11 @@ public class Archivable : MonoBehaviour
 
 	public virtual void Init ( ref JSONNode data, int i )
 	{
+		if ( Category == "SubclassMustDefine")
+		{
+			Debug.LogError ( "Category not defined!");
+			return;
+		}
 		Name = data [ Category ] [ i ] [ "name" ];
 		ID = data [ Category ] [ i ] [ "ID" ].AsInt;
 	}
