@@ -176,7 +176,7 @@ public class RoomManager : MonoBehaviour
 		foreach ( Room r in rooms )
 		{
 			if ( r.isVisible == false ) { continue; }
-			foreach ( FloorTile t in r.tiles )
+			foreach ( FloorTile t in r.tiles.Values )
 			{
 				if ( t.IsDoorway )
 				{
@@ -205,7 +205,7 @@ public class RoomManager : MonoBehaviour
 
 		if ( currentAddFloorState == AddFloorState.undefined || currentAddFloorState == AddFloorState.Removing)
 		{
-			if ( currentRoom.tiles.Contains ( tile ) )
+			if ( currentRoom.tiles.ContainsValue ( tile ) )
 			{
 				// Already exists, so toggle to remove mode and pull it out
 				SetAddFloorState ( AddFloorState.Removing );
@@ -228,7 +228,7 @@ public class RoomManager : MonoBehaviour
 		{
 			if ( r == currentRoom ) { continue; }
 
-			if ( r.tiles.Contains ( tile ) )
+			if ( r.tiles.ContainsValue ( tile ) )
 			{
 				if ( otherRoom != null )
 				{

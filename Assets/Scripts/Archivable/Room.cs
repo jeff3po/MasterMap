@@ -34,12 +34,12 @@ public class Room : Archivable
 	/// <summary>
 	/// All the tiles that make up this room
 	/// </summary>
-	public List<FloorTile> tiles = new List<FloorTile>();
+	public Dictionary<string,FloorTile> tiles = new Dictionary<string, FloorTile>();
 
 	public void SetVisible ( bool vis, bool semitransparent = false )
 	{
 		isVisible = vis;
-		foreach ( FloorTile t in tiles )
+		foreach ( FloorTile t in tiles.Values )
 		{
 			if ( semitransparent )
 			{
@@ -56,7 +56,7 @@ public class Room : Archivable
 	public bool IsAdajcent(FloorTile tile, bool ignoreDoors=false)
 	{
 		if ( ignoreDoors && tile.IsDoorway ) { return false; }
-		foreach ( FloorTile t in tiles )
+		foreach ( FloorTile t in tiles.Values )
 		{
 			int deltaX = Mathf.Abs (t.xPos - tile.xPos);
 			int deltaY = Mathf.Abs (t.yPos - tile.yPos);
@@ -71,29 +71,56 @@ public class Room : Archivable
 	public List<FloorTile> GetAdjacent ( FloorTile tile, bool axialOnly, bool allowDoors=true )
 	{
 		List<FloorTile> adjs = new List<FloorTile>();
-		foreach (FloorTile t in tiles )
+		int x = tile.xPos;
+		int y = tile.yPos;
+
+		adjs.Add ( FindTileByPos ( x-1, y) );
+		adjs.Add ( FindTileByPos ( x+1, y) );
+		adjs.Add ( FindTileByPos ( x, y-1) );
+		adjs.Add ( FindTileByPos ( x, y+1) );
+
+		if ( axialOnly == false )
 		{
-			if ( t == tile ) { continue; }
-			if ( t.IsDoorway && allowDoors==false ) { continue; }
-			int deltaX = Mathf.Abs (t.xPos - tile.xPos);
-			int deltaY = Mathf.Abs (t.yPos - tile.yPos);
-			if ( deltaX + deltaY <= 1 ) { adjs.Add ( t ); }
+			adjs.Add ( FindTileByPos ( x-1,y-1));
+			adjs.Add ( FindTileByPos ( x+1,y-1));
+			adjs.Add ( FindTileByPos ( x-1,y+1));
+			adjs.Add ( FindTileByPos ( x+1,y+1));
 		}
-		return adjs;
+
+		List<FloorTile> valids = new List<FloorTile>();
+		foreach ( FloorTile t in adjs )
+		{
+			if ( t == null ) { continue; }
+			if (t.IsDoorway && allowDoors == false ) { continue; }
+			valids.Add ( t );
+		}
+
+		return valids;
+	}
+
+	FloorTile FindTileByPos ( int x, int y )
+	{
+		// Use same furmula as FloorTile uniqueID
+		string uniqueID = x+"-"+y;
+		FloorTile t = null;
+		tiles.TryGetValue ( uniqueID, out t);
+		return t;
 	}
 
 	public void AddFloorTile ( FloorTile tile )
 	{
-		if ( tiles.Contains (tile) == false )
+		if ( tiles.ContainsKey ( tile.UniqueID()) == false )
 		{
-			tiles.Add ( tile );
-			tile.AddToRoom(this);
+			tiles.Add ( tile.UniqueID(), tile );
+			// And attach tp this room
+			tile.AddToRoom ( this );
 		}
 	}
 
 	public void RemoveFloorTile ( FloorTile tile )
 	{
-		tiles.Remove ( tile );
+		tiles.Remove ( tile.UniqueID() );
+		// And update room
 		tile.RemoveFromRoom ( this );
 	}
 
@@ -133,7 +160,7 @@ public class Room : Archivable
 		base.Export (ref data, i);
 
 		int tileCount = 0;
-		foreach ( FloorTile t in tiles )
+		foreach ( FloorTile t in tiles.Values )
 		{
 			data [ Category ] [ i ] [ "tile" ] [tileCount ] = t.UniqueID();
 			tileCount++;
