@@ -50,13 +50,12 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 
 	public enum EditMode
 	{
-		None,
 		Room,
-		Decoration,
+		Deco,
 		Play
 	}
 
-	public EditMode editMode = EditMode.None;
+	public EditMode editMode = EditMode.Room;
 
 	public void SetEditMode ( EditMode mode )
 	{
@@ -128,17 +127,6 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 		Vector3 delta = targetScrollPos - mapScroller.localPosition;
 		delta *= Time.deltaTime * 9.0f;
 		mapScroller.localPosition += delta;
-
-		if ( Input.GetKeyDown ( KeyCode.S ) )
-		{
-			// HACK! Quicksave
-			SaveMap();
-		}
-		if ( Input.GetKeyDown ( KeyCode.L ) )
-		{
-			// HACK! Quicksave
-			LoadMap();
-		}
 	}
 
 
@@ -232,15 +220,5 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 		if ( controlPanel.CanDrag ) { return; }
 
 		roomManager.InteractWithFloorTile ( tile );
-	}
-
-	public void LoadMap()
-	{
-		roomManager.LoadAll();
-	}
-
-	public void SaveMap()
-	{
-		roomManager.SaveAll();
 	}
 }

@@ -31,7 +31,7 @@ public class ControlPanel : MonoBehaviour
 	public Button OpenButton_ToClose;
 	public Button OpenButton_ToOpen;
 
-	public Vector2 _controlPanelClosed;
+	Vector2 _controlPanelClosed;
 
 	public Color currentColor = Color.white;
 
@@ -48,8 +48,12 @@ public class ControlPanel : MonoBehaviour
 		List<string>optionNames = new List<string> ( System.Enum.GetNames ( typeof(WorldMap.EditMode)) );
 		editModeDropdown.AddOptions( optionNames );
 		Open ( true );
+
 		_controlPanelClosed = Vector2.zero;
-		_controlPanelClosed.x -= frame.rectTransform.sizeDelta.x - OpenButton_ToOpen.image.rectTransform.sizeDelta.x;
+		LayoutElement buttonFrame = OpenButton_ToOpen.transform.parent.GetComponent<LayoutElement>();
+		float slideout = frame.rectTransform.sizeDelta.x - buttonFrame.preferredWidth;
+		_controlPanelClosed.x -= slideout;
+		Debug.Log ( "slideout "+slideout );
 
 		drawingPanel.AddButton ( "Floors", DrawRooms );
 		drawingPanel.AddButton ( "Doors", SetDoors );
@@ -63,10 +67,10 @@ public class ControlPanel : MonoBehaviour
 	public void ChangePanel()
 	{
 		string option = editModeDropdown.captionText.text;
-		if ( option == "Decoration")
+		if ( option == "Deco")
 		{
-			map.SetEditMode ( WorldMap.EditMode.Decoration );
-			ShowPanel ( WorldMap.EditMode.Decoration );
+			map.SetEditMode ( WorldMap.EditMode.Deco );
+			ShowPanel ( WorldMap.EditMode.Deco );
 		}
 		else
 		if ( option == "Room")
@@ -87,7 +91,7 @@ public class ControlPanel : MonoBehaviour
 			drawingPanel.gameObject.SetActive ( true );
 		}
 		else
-		if ( mode == WorldMap.EditMode.Decoration )
+		if ( mode == WorldMap.EditMode.Deco )
 		{
 			decorationPanel.gameObject.SetActive ( true );
 		}

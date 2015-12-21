@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
 public class RoomVisibilityPanel : MonoBehaviour 
 {
+	public Image frame;
+	public GridLayoutGroup grid;
 	public RoomVisToggle toggleTemplate;
 	List<RoomVisToggle> toggles = new List<RoomVisToggle>();
 
@@ -40,6 +43,13 @@ public class RoomVisibilityPanel : MonoBehaviour
 		tog.transform.localScale = Vector3.one;
 		toggles.Add ( tog );
 		tog.Setup ( index, c);
-//		Debug.Log ( "Added room toggle for index "+index);
+
+		int offset = (int) ((float)toggles.Count / (float)8);
+		offset +=2;
+		float ht = 150;//frame.rectTransform.sizeDelta.y;// / offset;
+		ht /= offset;
+		Vector2 newSz = new Vector2 ( 50, ht );
+		grid.cellSize = newSz;
+		Debug.Log ( "Offset "+offset+"  cellsize "+newSz);
 	}
 }
