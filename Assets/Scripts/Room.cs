@@ -1,25 +1,34 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using SimpleJSON;
 
 /// <summary>
 /// A room is a collection of floor tiles
 /// </summary>
-[System.Serializable]
-public class Room
+public class Room : Archivable
 {
+	public RoomManager roomManager;
+
 	public bool isVisible = true;
 
-
 	public Color roomColor = Color.white;
-	public string name;
-//	WorldMap worldMap;
 
-	public Room ( int index, WorldMap map )
+	public void Setup ( int index, WorldMap map )
 	{
-		name = "Room"+index;
+		Name = "Room"+index;
 		roomColor = map.globalColors[index];
-//		worldMap = map;
+	}
+
+	public override void SetupArchive()
+	{
+		base.SetupArchive();
+		Category = "Room";
+	}
+
+	public override string UniqueID()
+	{
+		return Name+ID;
 	}
 
 	/// <summary>
@@ -46,7 +55,7 @@ public class Room
 
 	public bool IsAdajcent(FloorTile tile, bool ignoreDoors=false)
 	{
-		if ( ignoreDoors && tile.isDoor ) { return false; }
+		if ( ignoreDoors && tile.IsDoor ) { return false; }
 		foreach ( FloorTile t in tiles )
 		{
 			int deltaX = Mathf.Abs (t.xPos - tile.xPos);
@@ -65,7 +74,7 @@ public class Room
 		foreach (FloorTile t in tiles )
 		{
 			if ( t == tile ) { continue; }
-			if ( t.isDoor && allowDoors==false ) { continue; }
+			if ( t.IsDoor && allowDoors==false ) { continue; }
 			int deltaX = Mathf.Abs (t.xPos - tile.xPos);
 			int deltaY = Mathf.Abs (t.yPos - tile.yPos);
 			if ( deltaX + deltaY <= 1 ) { adjs.Add ( t ); }
@@ -86,5 +95,52 @@ public class Room
 	{
 		tiles.Remove ( tile );
 		tile.RemoveFromRoom ( this );
+	}
+
+
+	List<string> tileIDs = new List<string>();
+
+	public override void PostInit()
+	{
+		// Find matching tiles in tile list
+		foreach ( string s in tileIDs )
+		{
+			// TODO: Change to dictionary
+			foreach ( FloorTile t in roomManager.allTiles )
+			{
+				if ( t.UniqueID() == s )
+				{
+					AddFloorTile ( t );
+					break;
+				}
+			}
+		}
+
+	}
+
+	public override void Init(ref JSONNode data, int i )
+	{
+		tileIDs.Clear();
+
+		base.Init (ref data, i );
+		int tileCount = data [ Category ] [ i ] [ "tileCount" ].AsInt;
+		for ( int tc=0;tc<tileCount;tc++)
+		{
+			tileIDs.Add ( data [ Category ] [ i ] [ "tile" ] [ tc ] );
+		}
+	}
+
+
+	public override void Export(ref JSONNode data, int i)
+	{
+		base.Export (ref data, i);
+
+		int tileCount = 0;
+		foreach ( FloorTile t in tiles )
+		{
+			data [ Category ] [ i ] [ "tile" ] [tileCount ] = t.UniqueID();
+			tileCount++;
+		}
+		data [ Category ] [ i ] [ "tileCount" ].AsInt = tileCount;
 	}
 }

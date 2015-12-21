@@ -49,16 +49,26 @@ public class RoomManager : MonoBehaviour
 
 	public Vector2 floorTileSize = Vector2.zero;
 
+	public Room MakeNewRoom()
+	{
+		GameObject go = new GameObject();
+		Room newRoom = go.AddComponent<Room>();
+		newRoom.roomManager = this;
+		newRoom.SetupArchive();
+		newRoom.Setup(rooms.Count,map);
+		map.controlPanel.visPanel.AddRoomToggle ( rooms.Count, newRoom.roomColor);
+		rooms.Add ( newRoom );
+		SetCurrentRoom ( newRoom );
+		return newRoom;
+	}
 	/// <summary>
 	/// Make a new one
 	/// </summary>
 	public void AddRoom()
 	{
-		Room newRoom = new Room(rooms.Count,map);
-		newRoom.name = "Roomname_"+rooms.Count;
-		map.controlPanel.visPanel.AddRoomToggle ( rooms.Count, newRoom.roomColor);
-		rooms.Add ( newRoom );
-		SetCurrentRoom ( newRoom );
+		Room newRoom = MakeNewRoom();
+		// Force a default name when adding one from scratch
+		newRoom.Name = "Roomname_"+rooms.Count;
 	}
 
 	/// <summary>
@@ -149,7 +159,7 @@ public class RoomManager : MonoBehaviour
 	public bool SetCurrentRoomName ( string nm )
 	{
 		if (currentRoom == null ) { return false; }
-		currentRoom.name = nm;
+		currentRoom.Name = nm;
 		return true;
 	}
 
@@ -166,7 +176,7 @@ public class RoomManager : MonoBehaviour
 			if ( r.isVisible == false ) { continue; }
 			foreach ( FloorTile t in r.tiles )
 			{
-				if ( t.isDoor )
+				if ( t.IsDoor )
 				{
 					t.SetVisible ( true );
 				}
@@ -189,11 +199,9 @@ public class RoomManager : MonoBehaviour
 			{
 				// Already exists, so toggle to remove mode and pull it out
 				SetAddFloorState ( AddFloorState.Removing );
-				if ( tile.isDoor )
+				if ( tile.IsDoor )
 				{
-					tile.isDoor = false;
-					Debug.Log ( "Destroying "+tile.attachedDoor.name );
-					GameObject.Destroy ( tile.attachedDoor.gameObject );
+					tile.RemoveDoor();
 				}
 				currentRoom.RemoveFloorTile ( tile );
 				// Reset current room to fix underlying room's version of this tile
@@ -248,18 +256,16 @@ public class RoomManager : MonoBehaviour
 				// reevaluate the rooms to split them then add the tile back to both rooms with the door flag
 
 				// Add door only once
-				if ( tile.isDoor == false )
+				if ( tile.IsDoor == false )
 				{
-					tile.isDoor = true;
-
 					Door newDoor = GameObject.Instantiate ( doorTemplate );
 					newDoor.gameObject.SetActive ( true );
 					newDoor.transform.SetParent( tile.transform);
 					newDoor.transform.localScale = Vector3.one;
 					newDoor.transform.localPosition = Vector3.zero;
-					tile.attachedDoor = newDoor;
-					newDoor.name = "Door_"+tile.name+" "+currentRoom.name+" -> "+otherRoom.name;
-					Debug.Log ( "Adding "+newDoor.name );
+					tile.AttachDoor ( newDoor );
+					newDoor.name = "Door_"+tile.name+" "+currentRoom.Name+" -> "+otherRoom.Name;
+//					Debug.Log ( "Adding "+newDoor.name );
 					// Once a door has been added, no more drawing on this stroke
 					SetAddFloorState ( AddFloorState.invalid );
 
@@ -281,6 +287,11 @@ public class RoomManager : MonoBehaviour
 	}
 
 	bool resetAddFloor = false;
+
+	/// <summary>
+	/// Since the pointerUp event happens between frames, the enum for AddFloorState is inaccessible at that instant.
+	/// Wait until next frame to complete reset
+	/// </summary>
 	public void ResetAddFloorState()
 	{
 		resetAddFloor = true;
@@ -289,7 +300,6 @@ public class RoomManager : MonoBehaviour
 	public void SetAddFloorState ( AddFloorState state )
 	{
 		if ( state == currentAddFloorState ) { return; }
-		Debug.Log ( "Changing state from "+currentAddFloorState.ToString()+" to "+state.ToString() );
 		currentAddFloorState = state;
 	}
 

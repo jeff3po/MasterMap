@@ -828,7 +828,6 @@ GameObject:
   - 114: {fileID: 198570655}
   - 114: {fileID: 198570657}
   - 114: {fileID: 198570658}
-  - 225: {fileID: 198570659}
   m_Layer: 5
   m_Name: FloorTileTemplate
   m_TagString: Untagged
@@ -897,9 +896,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8323aba228fec44cc8d67509cf905786, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomManager: {fileID: 1623060729}
   floorImage: {fileID: 198570655}
-  group: {fileID: 198570659}
   xPos: 0
   yPos: 0
   color: {r: 0, g: 0, b: 0, a: 0}
@@ -918,17 +915,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Delegates: []
   delegates: []
---- !u!225 &198570659
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 198570653}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
 --- !u!1 &218030264
 GameObject:
   m_ObjectHideFlags: 0
@@ -5595,8 +5581,8 @@ MonoBehaviour:
   maxZoom: 5
   globalColors: []
   targetScrollPos: {x: 0, y: 0, z: 0}
-  editMode: 0
   mapSize: {x: 0, y: 0}
+  editMode: 0
 --- !u!114 &1623060729
 MonoBehaviour:
   m_ObjectHideFlags: 0

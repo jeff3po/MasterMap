@@ -16,7 +16,7 @@ public class DrawingPanel : ControlPanelSubpanel
 		ResetPicker();
 	}
 
-	void ResetPicker(string overridename="")
+	public void ResetPicker(string overridename="")
 	{
 		// Reset picker
 		roomPicker.ClearOptions();
@@ -25,8 +25,8 @@ public class DrawingPanel : ControlPanelSubpanel
 		string current = "";
 		foreach ( Room r in map.roomManager.rooms )
 		{
-			data.Add ( new Dropdown.OptionData ( r.name ) );
-			current = r.name;
+			data.Add ( new Dropdown.OptionData ( r.Name ) );
+			current = r.Name;
 		}
 
 		roomPicker.AddOptions ( data );
@@ -86,7 +86,7 @@ public class DrawingPanel : ControlPanelSubpanel
 		}
 		else
 		{
-			roomName.text = map.SetCurrentRoom(index).name;
+			roomName.text = map.SetCurrentRoom(index).Name;
 		}
 	}
 }

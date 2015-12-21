@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections;
 using System.Collections.Generic;
+using SimpleJSON;
 
 public class WorldMap : MonoBehaviour, IScrollHandler
 {
@@ -42,6 +43,10 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 	public Vector3 targetScrollPos = Vector3.zero;
 	float zoomFactor = 1.0f;
 
+	/// <summary>
+	/// Pixel size of interface window
+	/// </summary>
+	public Vector2 mapSize;
 
 	public enum EditMode
 	{
@@ -91,6 +96,7 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 			for ( int y=0;y<rowCount;y++)
 			{
 				FloorTile newTile = Instantiate ( roomManager.floorTileTemplate );
+				newTile.SetupArchive();
 				newTile.gameObject.SetActive ( true );
 
 				newTile.transform.SetParent ( roomManager.floorTileTemplate.transform.parent );
@@ -109,8 +115,6 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 		targetScrollPos.y = -mapSize.y/2;
 	}
 
-	public Vector2 mapSize;
-
 	void Update()
 	{
 		float scrollJump = 64.0f;
@@ -125,6 +129,17 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 		Vector3 delta = targetScrollPos - mapScroller.localPosition;
 		delta *= Time.deltaTime * 9.0f;
 		mapScroller.localPosition += delta;
+
+		if ( Input.GetKeyDown ( KeyCode.S ) )
+		{
+			// HACK! Quicksave
+			SaveMap();
+		}
+		if ( Input.GetKeyDown ( KeyCode.L ) )
+		{
+			// HACK! Quicksave
+			LoadMap();
+		}
 	}
 
 
@@ -212,5 +227,49 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 		if ( controlPanel.CanDrag ) { return; }
 
 		roomManager.InteractWithFloorTile ( tile );
+	}
+
+	public void LoadMap()
+	{
+		foreach ( Room r in roomManager.rooms )
+		{
+			Destroy ( r.gameObject );
+		}
+		roomManager.rooms.Clear();
+
+		string jsonString = PlayerPrefs.GetString ( "savefile" );
+		JSONNode data = JSON.Parse ( jsonString );
+		int roomCount = data [ "World" ] [ "roomCount" ].AsInt ;
+		for ( int i=0;i<roomCount;i++)
+		{
+			Room newRoom = roomManager.MakeNewRoom();
+			newRoom.Init( ref data, i );
+			controlPanel.drawingPanel.ResetPicker();
+		}
+
+		foreach ( Room r in roomManager.rooms )
+		{
+			r.PostInit();
+		}
+	}
+
+	public void SaveMap()
+	{
+		// Construct the JSON version
+		string blanknode = "{\"archiveType\":\"World\"}";
+		JSONNode data = JSONNode.Parse (blanknode);
+
+		int roomCount = 0;
+		foreach ( Room r in roomManager.rooms )
+		{
+			r.Export ( ref data, roomCount );
+			roomCount ++;
+		}
+		data [ "World" ] ["roomCount"].AsInt = roomCount;
+
+		string jsonstring = data.ToString();
+		PlayerPrefs.SetString ( "savefile", jsonstring );
+
+		Debug.Log ( DBDatabase.jsonToReadable ( jsonstring ) );
 	}
 }

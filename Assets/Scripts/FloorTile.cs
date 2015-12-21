@@ -4,22 +4,68 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
-public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScrollHandler, IPointerUpHandler, IPointerDownHandler //, IEndDragHandler
+public class FloorTile : Archivable, IDragHandler, IPointerEnterHandler, IScrollHandler, IPointerUpHandler, IPointerDownHandler
 {
-	public RoomManager roomManager;
-	public Image floorImage;
-	public CanvasGroup group;
-	public int xPos;
-	public int yPos;
-	public Color color;
-	public Door attachedDoor = null;
-	public bool isDoor = false;
+	/// <summary>
+	/// Once any floor tile is being touched, they all know about it
+	/// </summary>
+	static public bool touching = false;
 
-	List<Room> owningRooms = new List<Room>();
-
+	/// <summary>
+	/// Link to main interface
+	/// </summary>
 	WorldMap map;
 
-	static public bool touching = false;
+	/// <summary>
+	/// Default image. Overridden by other factors
+	/// </summary>
+	public Image floorImage;
+
+	/// <summary>
+	/// Coordinates
+	/// </summary>
+	public int xPos;
+
+	/// <summary>
+	/// Coordinates
+	/// </summary>
+	public int yPos;
+
+	/// <summary>
+	/// Color override
+	/// </summary>
+	public Color color;
+
+	/// <summary>
+	/// Can attach a door
+	/// </summary>
+	Door attachedDoor = null;
+
+	public override void SetupArchive()
+	{
+		base.SetupArchive();
+		Category = "FloorTile";
+	}
+	/// <summary>
+	/// Is true if there's a door attached
+	/// </summary>
+	public bool IsDoor
+	{
+		get { return attachedDoor != null; }
+	}
+
+	/// <summary>
+	/// Unique because there can be only one tile at each coordinate
+	/// </summary>
+	public override string UniqueID()
+	{
+		return xPos+"-"+yPos;
+	}
+
+	/// <summary>
+	/// Convenience list of the one or two rooms in which this tile lives
+	/// </summary>
+	List<Room> owningRooms = new List<Room>();
 
 	public void AddToRoom ( Room r )
 	{
@@ -125,6 +171,19 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 	public void EndTouch()
 	{
 		touching = false;
-		roomManager.ResetAddFloorState();
+		map.roomManager.ResetAddFloorState();
 	}
+
+	public void AttachDoor ( Door door )
+	{
+		attachedDoor = door;
+	}
+
+	public void RemoveDoor()
+	{
+		Destroy ( attachedDoor.gameObject );
+		attachedDoor = null;
+	}
+
+
 }
