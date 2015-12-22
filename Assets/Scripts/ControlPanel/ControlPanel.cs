@@ -54,7 +54,7 @@ public class ControlPanel : MonoBehaviour
 		LayoutElement buttonFrame = OpenButton_ToOpen.transform.parent.GetComponent<LayoutElement>();
 		float slideout = frame.rectTransform.sizeDelta.x - buttonFrame.preferredWidth;
 		_controlPanelClosed.x -= slideout;
-		Debug.Log ( "slideout "+slideout );
+//		Debug.Log ( "slideout "+slideout );
 
 		drawingPanel.AddButton ( "Floors", DrawRooms );
 		drawingPanel.AddButton ( "Doors", SetDoors );

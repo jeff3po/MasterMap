@@ -135,8 +135,45 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 		return closestTile;
 	}
 
+	void TestDice()
+	{
+		string message = "";
+		int samplesize = 10000;
+		List<int>rolls = new List<int>();
+		for ( int i=0;i<samplesize;i++)
+		{
+			int r = DiceRoller.Roll ( 3,6 );
+			rolls.Add ( r );
+		}
+
+		List<int> results = new List<int>();
+		for ( int i=0;i<19;i++)
+		{
+			results.Add ( 0 );
+		}
+
+		foreach ( int i in rolls )
+		{
+			results[i]++;
+		}
+
+		for ( int i=3;i<19;i++)
+		{
+			float pct = (float)results[i] / (float)samplesize;
+			message += " "+i+": "+(pct*100)+"\n";
+		}
+		Debug.Log ( message );
+	}
+
 	void Update()
 	{
+		if ( Input.GetKeyDown(KeyCode.RightShift)) 
+		{ 
+			TestDice();
+		}
+
+
+
 		float scrollJump = 64.0f;
 		if ( Input.GetKeyDown(KeyCode.UpArrow)) { targetScrollPos += Vector3.up * scrollJump; }
 		if ( Input.GetKeyDown(KeyCode.DownArrow)) { targetScrollPos += Vector3.down * scrollJump; }

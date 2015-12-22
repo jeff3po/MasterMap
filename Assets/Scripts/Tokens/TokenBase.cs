@@ -2,6 +2,7 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 /// <summary>
 /// Base token type. Draggable and droppable from/to FloorTiles. 
@@ -13,7 +14,18 @@ public class TokenBase : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 	public FloorTile homeTile = null;
 	public WorldMap map;
 	public RectTransform tokenLayer;
+	bool _isMobile = true;
 
+	/// <summary>
+	/// All possible activity lists
+	/// </summary>
+	public Dictionary<string,ActivityList> allPossibleActivities = new Dictionary<string, ActivityList>();
+
+	public virtual bool isMobile()
+	{
+		// TODO: Subclasses like Characters are always mobile while decorations are mobile only during Deco edit mode
+		return _isMobile;
+	}
 
 	public void OnBeginDrag ( PointerEventData data )
 	{
@@ -50,7 +62,7 @@ public class TokenBase : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 		transform.SetParent ( homeTile.transform );
 		transform.localPosition = Vector3.zero;
 		transform.localScale = Vector3.one;
-		Debug.Log ( string.Format ("Dropped {0} onto {1}, mounted to {2}", name, homeTile.name, transform.parent ) );
+//		Debug.Log ( string.Format ("Dropped {0} onto {1}, mounted to {2}", name, homeTile.name, transform.parent ) );
 
 		DebugOutput();
 	}
