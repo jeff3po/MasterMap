@@ -30,4 +30,16 @@ public class Chooser : MonoBehaviour
 		choices.Clear();
 		gameObject.SetActive ( false );
 	}
+
+	public void CloseChooser()
+	{
+		foreach ( ChooserButton b in choices )
+		{
+			Destroy ( b.gameObject );
+		}
+
+		choices.Clear();
+
+		gameObject.SetActive ( false );
+	}
 }

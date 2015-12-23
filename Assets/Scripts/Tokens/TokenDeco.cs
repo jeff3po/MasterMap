@@ -2,6 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 
+/// <summary>
+/// Token subclass specific to non-structural elements of the map (i.e. furniture).
+/// Activities can be assigned to these tokens, providing players a network of actions to perform on the object
+/// </summary>
 public class TokenDeco : TokenBase 
 {
 	public Dictionary<string,ActivityList> activityLists = new Dictionary<string, ActivityList>();

@@ -20,8 +20,11 @@ public class CharacterDrawer : InfoDrawer
 		statFieldOtherTemplate.gameObject.SetActive ( false );
 	}
 
-	public void Setup ( CharacterStats s )
+	Dictionary<string,CharacterDrawer> owningDictionary;
+
+	public void Setup ( CharacterStats s, Dictionary<string,CharacterDrawer> dic )
 	{
+		owningDictionary = dic;
 		stats = s;
 		playerNameField.text = stats.playerName;
 		characterNameField.text = stats.characterName;
@@ -32,16 +35,16 @@ public class CharacterDrawer : InfoDrawer
 			stats.abilities.TryGetValue ( nm, out val );
 			AddStat ( nm, val.ToString());
 		}
+		AddStat ( "AC", stats.armorClass.ToString() );
+		AddStat ( "Sp", stats.speed.ToString() );
 
 		AddOtherStat ( "Level", stats.level.ToString() );
-		AddOtherStat ( "AC", stats.armorClass.ToString() );
-		AddOtherStat ( "Spd", stats.speed.ToString() );
 		string hp = string.Format ( "{0}/{1}", stats.hitPoints_Current, stats.hitPoints_Max );
 		AddOtherStat ( "HP", hp );
 
 		List<Dropdown.OptionData> data = new List<Dropdown.OptionData>();
 
-		data.Add ( new Dropdown.OptionData ("Attack") );
+		data.Add ( new Dropdown.OptionData (attackChooserHeader) );
 
 		foreach ( string key in stats.attacks.Keys )
 		{
@@ -50,6 +53,8 @@ public class CharacterDrawer : InfoDrawer
 
 		attackDropdown.AddOptions ( data );
 	}
+
+	string attackChooserHeader = "Choose attack...";
 
 	/// <summary>
 	/// Stat template is already in a grid layout group, so no positioning required
@@ -77,13 +82,14 @@ public class CharacterDrawer : InfoDrawer
 	{
 		string attack = attackDropdown.captionText.text;
 
-		if ( attack == "Attack" ) 
+		attackDropdown.value = 0;
+		attackDropdown.RefreshShownValue();
+
+		if ( attack == attackChooserHeader ) 
 		{
 			// Empty slot at start of list
 			return;
 		}
-
-		Debug.Log ( "Attack: "+attack);
 
 		stats.attacks.TryGetValue ( attack, out currentAttack );
 
@@ -128,5 +134,15 @@ public class CharacterDrawer : InfoDrawer
 			map.spinner.SpinTheWheel ( currentAttack.damageDice, ResultOfDamageRoll, -999, "damage" );
 		}
 	}
-	bool rollForDamage = false;
+
+	/// <summary>
+	/// Follow-up spinner for damage has to wait a frame to allow rollToHit spinner to clear
+	/// </summary>
+	bool rollForDamage = false;	
+
+	public override void Close()
+	{
+		owningDictionary.Remove ( stats.characterName );
+		base.Close();
+	}
 }

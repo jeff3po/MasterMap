@@ -15,7 +15,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &116620
 GameObject:
   m_ObjectHideFlags: 1
@@ -443,7 +443,7 @@ MonoBehaviour:
   wedgeTemplate: {fileID: 11474104}
   marker: {fileID: 11401092}
   fullSpins: 3
-  spinRate: 1
+  spinRate: 2
 --- !u!114 &11416344
 MonoBehaviour:
   m_ObjectHideFlags: 1

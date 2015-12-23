@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 /// <summary>
 /// Base token type. Draggable and droppable from/to FloorTiles. 
-/// Subclasses are players, monsters, etc
+/// Subclasses are players, monsters, furniture, etc
 /// </summary>
 public class TokenBase : Archivable, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler, IPointerClickHandler
 {
@@ -84,11 +84,10 @@ public class TokenBase : Archivable, IBeginDragHandler, IDragHandler, IEndDragHa
 
 	void DebugOutput()
 	{
-		string homeName = "No home"; if ( homeTile != null ) { homeName = homeTile.name; }
-		string parentName = "Not parented"; if ( transform.parent != null ) { parentName = transform.parent.name; }
-		string message = string.Format ( "Home tile: {0}\nParent: {1}", homeName, parentName );
-		map.infoPanel.AddInfoDrawer ( name, name, message );
-
+//		string homeName = "No home"; if ( homeTile != null ) { homeName = homeTile.name; }
+//		string parentName = "Not parented"; if ( transform.parent != null ) { parentName = transform.parent.name; }
+//		string message = string.Format ( "Home tile: {0}\nParent: {1}", homeName, parentName );
+//		map.infoPanel.AddInfoDrawer ( name, name, message );
 
 		CharacterStats stats = new CharacterStats("Boris", "Jeff", 3, new int[]{10,16,10,12,10,10}, 20, 12, 30 );
 		stats.AddAttack ( new Attack ( "Sword", "Dx", 5, Attack.AttackType.Melee, 1, 1, 6, 2, "slashing" ) );

@@ -24,4 +24,10 @@ public class InfoDrawer : MonoBehaviour
 		label.text = lbl;
 		message.text = msg;
 	}
+
+	public virtual void Close()
+	{
+		// Call baseclass last after managing any dictionaries that might contain these
+		Destroy ( this.gameObject );
+	}
 }

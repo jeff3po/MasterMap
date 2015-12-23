@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 /// <summary>
-/// Bar at top of screen
+/// Panel in the bar at top of screen
 /// </summary>
 public class InfoPanel : MonoBehaviour 
 {
@@ -61,7 +61,7 @@ public class InfoPanel : MonoBehaviour
 		drawer.gameObject.SetActive( true );
 		drawer.transform.SetParent ( characterDrawerTemplate.transform.parent );
 		drawer.transform.localScale = Vector3.one;
-		drawer.Setup ( stats );
+		drawer.Setup ( stats, characterDrawers );
 		characterDrawers.Add ( nm, drawer );
 	}
 }
