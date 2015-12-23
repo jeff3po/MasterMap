@@ -4,40 +4,85 @@ using System.Collections.Generic;
 
 public class TokenDeco : TokenBase 
 {
-	/// <summary>
-	/// Things that can be done to this particular piece of furniture
-	/// </summary>
-	public List<string> ActivityCategory = new List<string>();
-//	{
-//		Examine,
-//		SitOn,
-//		SleepOn,
-//		Unlock,
-//		Open,
-//		Close,
-//		Break
-//	}
-
-	public Dictionary<string,Activity> activities = new Dictionary<string, Activity>();
+	public Dictionary<string,ActivityList> activityLists = new Dictionary<string, ActivityList>();
 
 	void Start()
 	{
 		
 	}
 
-	public void AddActivity ( string activityName, int diff )
+	public override void Interact()
 	{
-		activities.Add ( activityName, new Activity(diff) );
+		base.Interact();
+
+		if ( map.editMode != WorldMap.EditMode.Play ) 
+		{
+			return;
+		}
+			
+		string display = string.Format("Interacting with {0}", Name );
+		foreach ( ActivityList alist in activityLists.Values )
+		{
+			if ( alist.IsAccessible )
+			{
+				// Show entries
+				foreach ( string act in alist.activities.Keys )
+				{
+					map.chooser.AddButton(act,ChooseThisActivity);
+					display += "\n"+act;
+				}
+			}
+		}
+		Debug.Log ( display );
 	}
 
-	public bool PerformActivity ( string activityName, int roll )
+	void ChooseThisActivity ( string act )
 	{
-		Activity activity = null;
-		// Find it
-		activities.TryGetValue ( activityName, out activity );
-		if ( activity == null ) { Debug.LogError ( "No activity: "+activityName); return false; }
-		return activity.Attempt(roll);
-	}
-	// If it can be opened, it can have inventory
+		foreach (ActivityList list in activityLists.Values )
+		{
+			list.activities.TryGetValue ( act, out currentActivity );
+			if ( currentActivity != null )
+			{
+				break;
+			}
+		}
 
+		if ( currentActivity == null )
+		{
+			Debug.LogError ( "Couldn't find "+act);
+			return;
+		}
+
+		// Roll for it
+		Debug.Log ( "Roll for "+act );
+
+		// TODO: Character stat for rolling
+//		int statMod = stats.SkillModifier ( currentAttack.abilityForRoll );
+//		statMod += currentAttack.plusToHit;
+		int targetRoll = currentActivity.difficulty;
+
+		map.spinner.SpinTheWheel ( new Dice ( 1,20,0), activityResult, targetRoll, "to "+currentActivity.Name );
+	}
+
+	Activity currentActivity = null;
+
+	void activityResult ( int result, bool success )
+	{
+		Debug.Log ( currentActivity.Name+" success: "+success);
+		if ( success )
+		{
+			if ( currentActivity.activityListAvailableOnSuccess != null )
+			{
+				currentActivity.activityListAvailableOnSuccess.MakeAccessible(true);
+
+				// Automatically re-build the updated menu
+				Interact();
+			}
+		}
+	}
+
+	public void AddActivityList ( ActivityList act )
+	{
+		activityLists.Add ( act.title, act );
+	}
 }

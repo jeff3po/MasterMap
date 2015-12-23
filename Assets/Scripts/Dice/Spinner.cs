@@ -42,15 +42,34 @@ public class Spinner : MonoBehaviour
 	List<SpinnerWedge> wedges = new List<SpinnerWedge>();
 	string action = "";
 
-	System.Action<int> rollCallback;
+	System.Action<int,bool> rollCallback;
 
 	void Start()
 	{
 		wedgeTemplate.gameObject.SetActive ( false );
 	}
 
-	public void Setup ( Dice dice, System.Action<int> callback, int target, string act )
+	public void SpinTheWheel ( Dice dice, System.Action<int,bool> callback, int target, string action )
 	{
+		Setup ( dice, callback, target, action );
+	}
+		
+	public void Setup ( Dice dice, System.Action<int,bool> callback, int target, string act )
+	{
+		foreach (SpinnerWedge w in wedges ) { Destroy ( w.gameObject ); }
+		wedges.Clear();
+		finalValue = 0;
+		targetValue = -999;
+		prevClosest = null;
+		modifier = 0;
+		bonusText.text = "";
+		resultText.text = "";
+		rollValue.text = "Spin";
+		targetSpin = 0;
+		currentSpin = 0;
+		action = "";
+		spinState = SpinState.Unspun;
+
 		gameObject.SetActive ( true );
 		targetValue = target;
 		action = act;
@@ -143,9 +162,9 @@ public class Spinner : MonoBehaviour
 	{
 		if ( spinState == SpinState.Spun )
 		{
-			rollCallback ( finalValue );
-			// Self-destruct
-			Destroy ( this.gameObject );
+			rollCallback ( finalValue, finalValue>=targetValue );
+			// Hide
+			this.gameObject.SetActive ( false );
 		}
 
 		if ( spinState != SpinState.Unspun ) { return; }
@@ -207,7 +226,6 @@ public class Spinner : MonoBehaviour
 				{
 					closestMark = dist;
 					closestWedge = w;
-					finalValue = w.value;
 				}
 			}
 

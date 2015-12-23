@@ -3,17 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using SimpleJSON;
 
-public class Door : Archivable 
+public class Door : TokenDeco 
 {
 	/// <summary>
 	/// Handy shortcut to the manager
 	/// </summary>
 	RoomManager roomManager;
-
-	/// <summary>
-	/// Where it lives
-	/// </summary>
-	FloorTile homeTile;
 
 	/// <summary>
 	/// Which direction is it facing? (North-South or East-West for orientation, exact facing matters for barred door
@@ -75,9 +70,33 @@ public class Door : Archivable
 		{
 			transform.localRotation = Quaternion.Euler ( new Vector3 ( 0,0,90));
 		}
+
+		// Setup token properties
+		ActivityList defaultActivities = new ActivityList("default",true);
+		ActivityList postExamineActivities = new ActivityList("postExamine",false);
+		ActivityList postUnlockActivities = new ActivityList("postUnlock",false);
+
+		defaultActivities.AddActivity ( new Activity ( "Examine", 5, "Int", postExamineActivities, true ));
+
+		postExamineActivities.AddActivity ( new Activity ( "Pick Lock", 12, "Dex", postUnlockActivities, false, null, BreakLockpick ));
+		postExamineActivities.AddActivity ( new Activity ( "Break Down", 15, "Str", postUnlockActivities, true ));
+
+		postUnlockActivities.AddActivity ( new Activity ( "Open", 0, "Str", null, false, OpenDoor ));
+
+		AddActivityList ( defaultActivities );
+		AddActivityList ( postExamineActivities );
+		AddActivityList ( postUnlockActivities );
 	}
 
+	void BreakLockpick()
+	{
+		Debug.Log ("Breal lockpick");
+	}
 
+	void OpenDoor()
+	{
+		Debug.Log ( "Open door!");
+	}
 
 	// - - - A R C H I V E - - - - -
 

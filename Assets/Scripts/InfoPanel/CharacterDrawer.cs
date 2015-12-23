@@ -99,33 +99,34 @@ public class CharacterDrawer : InfoDrawer
 		int statMod = stats.SkillModifier ( currentAttack.abilityForRoll );
 		statMod += currentAttack.plusToHit;
 
-		SpinTheWheel ( new Dice ( 1,20,statMod), ResultOfAttackRoll, targetRoll, "to hit" );
+		map.spinner.SpinTheWheel ( new Dice ( 1,20,statMod), ResultOfAttackRoll, targetRoll, "to hit" );
 
-	}
-
-	void SpinTheWheel ( Dice dice, System.Action<int> callback, int target, string action )
-	{
-		Spinner spin = Instantiate ( map.spinnerTemplateOnDisk );
-		spin.transform.SetParent ( map.spinnerLayer );
-		spin.transform.localScale = Vector3.one;
-		spin.transform.localPosition = Vector3.zero;
-		spin.Setup ( dice, callback, target, action );
 	}
 
 	int targetRoll = 0;
 	Attack currentAttack = null;
 
-	void ResultOfAttackRoll ( int result )
+	void ResultOfAttackRoll ( int result, bool success )
 	{
-		if ( result >= targetRoll )
+		if ( success )
 		{
 			Debug.Log ( "Success!");
-			SpinTheWheel ( currentAttack.damageDice, ResultOfDamageRoll, -999, "damage" );
+			rollForDamage = true;
 		}
 	}
 
-	void ResultOfDamageRoll ( int result )
+	void ResultOfDamageRoll ( int result, bool success )
 	{
 		Debug.Log ( "Damage: "+result );
 	}
+		
+	void Update()
+	{
+		if ( rollForDamage )
+		{
+			rollForDamage = false;
+			map.spinner.SpinTheWheel ( currentAttack.damageDice, ResultOfDamageRoll, -999, "damage" );
+		}
+	}
+	bool rollForDamage = false;
 }

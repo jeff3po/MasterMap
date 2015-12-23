@@ -50,6 +50,6 @@ public class RoomVisibilityPanel : MonoBehaviour
 		ht /= offset;
 		Vector2 newSz = new Vector2 ( 50, ht );
 		grid.cellSize = newSz;
-		Debug.Log ( "Offset "+offset+"  cellsize "+newSz);
+//		Debug.Log ( "Offset "+offset+"  cellsize "+newSz);
 	}
 }

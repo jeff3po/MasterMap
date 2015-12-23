@@ -8,7 +8,8 @@ using SimpleJSON;
 public class WorldMap : MonoBehaviour, IScrollHandler
 {
 	public InfoPanel infoPanel;
-	public RectTransform spinnerLayer;
+	public Spinner spinner;
+	public Chooser chooser;
 
 	public RectTransform tokenLayer;
 
