@@ -7,6 +7,8 @@ using System.Collections;
 /// </summary>
 public class InfoDrawer : MonoBehaviour 
 {
+	public WorldMap map;
+
 	/// <summary>
 	/// Main title at bottom of drawer, always visible (even when rolled up)
 	/// </summary>

@@ -72,6 +72,12 @@ public class TokenBase : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 		string homeName = "No home"; if ( homeTile != null ) { homeName = homeTile.name; }
 		string parentName = "Not parented"; if ( transform.parent != null ) { parentName = transform.parent.name; }
 		string message = string.Format ( "Home tile: {0}\nParent: {1}", homeName, parentName );
-		map.infoPanel.AddDrawer ( name, name, message );
+		map.infoPanel.AddInfoDrawer ( name, name, message );
+
+
+		CharacterStats stats = new CharacterStats("Boris", "Jeff", 3, new int[]{10,16,10,10,10,10}, 20, 12, 30 );
+		stats.AddAttack ( new Attack ( "Sword", "Dx", 5, Attack.AttackType.Melee, 1, 1, 6, 2, "slashing" ) );
+		stats.AddAttack ( new Attack ( "Magic Missile", "In", 120, Attack.AttackType.Ranged, 1, 1, 4, 1, "radiant"));
+		map.infoPanel.AddCharacterDrawer ( stats );
 	}
 }

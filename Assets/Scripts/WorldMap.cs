@@ -8,6 +8,7 @@ using SimpleJSON;
 public class WorldMap : MonoBehaviour, IScrollHandler
 {
 	public InfoPanel infoPanel;
+	public RectTransform spinnerLayer;
 
 	public RectTransform tokenLayer;
 
@@ -46,6 +47,8 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 
 	public Vector3 targetScrollPos = Vector3.zero;
 	float zoomFactor = 1.0f;
+
+	public Spinner spinnerTemplateOnDisk;
 
 	/// <summary>
 	/// Pixel size of interface window

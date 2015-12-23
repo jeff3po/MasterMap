@@ -10,29 +10,39 @@ public class CharacterStats
 	public string characterName = "";
 	public string playerName = "";
 
-	Dictionary<string,int> abilities = new Dictionary<string, int>();
+	public Dictionary<string,int> abilities = new Dictionary<string, int>();
+	public Dictionary<string,Attack> attacks = new Dictionary<string, Attack>();
 
-	public static string[] abilityNames = new string[]{"STR","DEX","CON","INT","WIS","CHA"};
+	public static string[] abilityNames = new string[]{"St","Dx","Cn","In","Ws","Ch"};
 
-	public int Level = 1;
-	public int ArmorClass = 10;
-	public int HitPoints_Max = 10;
-	public int HitPoints_Current = 10;
-	public int HitPoints_Temporary = 0;
+	public int level = 1;
+	public int armorClass = 10;
+	public int speed = 30;
+	public int hitPoints_Max = 10;
+	public int hitPoints_Current = 10;
+	public int hitPoints_Temporary = 0;
 
-	public CharacterStats ( string nm, string player, int[] abs, int maxHP )
+	public CharacterStats ( string nm, string player, int lev, int[] abs, int maxHP, int ac, int spd )
 	{
 		characterName = nm;
 		playerName = player;
 		SetAbilities ( abs );
 		SetHP ( maxHP, 0, maxHP);
+		armorClass = ac;
+		speed = spd;
+	}
+
+	public void AddAttack ( Attack a )
+	{
+		if ( attacks.ContainsKey ( a.title ) ) { return; }
+		attacks.Add ( a.title, a );
 	}
 
 	public void SetHP ( int current, int temp=-1, int max=-1)
 	{
-		HitPoints_Current = current;
-		if ( temp >= 0 ) { HitPoints_Temporary = temp; }
-		if ( max >= 0 ) { HitPoints_Max = max; }
+		hitPoints_Current = current;
+		if ( temp >= 0 ) { hitPoints_Temporary = temp; }
+		if ( max >= 0 ) { hitPoints_Max = max; }
 	}
 
 	public void SetAbilities ( int[] abs )
