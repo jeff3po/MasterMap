@@ -10,11 +10,6 @@ public class TokenDeco : TokenBase
 {
 	public Dictionary<string,ActivityList> activityLists = new Dictionary<string, ActivityList>();
 
-	void Start()
-	{
-		
-	}
-
 	public override void Interact()
 	{
 		base.Interact();
@@ -23,6 +18,8 @@ public class TokenDeco : TokenBase
 		{
 			return;
 		}
+
+		if ( activityLists.Count == 0 ) { return; }
 			
 		string display = string.Format("Interacting with {0}", Name );
 		foreach ( ActivityList alist in activityLists.Values )

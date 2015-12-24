@@ -29,39 +29,45 @@ public class TokenBase : Archivable, IBeginDragHandler, IDragHandler, IEndDragHa
 
 	public void OnBeginDrag ( PointerEventData data )
 	{
-		if ( map.editMode == WorldMap.EditMode.Play ) { return; }
+		if ( map.editMode == WorldMap.EditMode.Room ) { return; }
 			
 		transform.SetParent ( tokenLayer );
 		homeTile = null;
-		DebugOutput();
+		Infopanel();
 	}
 
 	public void OnDrag ( PointerEventData data)
 	{
-		if ( map.editMode == WorldMap.EditMode.Play ) { return; }
+		if ( map.editMode == WorldMap.EditMode.Room ) { return; }
 		transform.Translate ( data.delta );
 	}
 
 	public void OnEndDrag ( PointerEventData data )
 	{
-		if ( map.editMode == WorldMap.EditMode.Play ) { return; }
+		if ( map.editMode == WorldMap.EditMode.Room ) { return; }
 		FindNewHome();
 	}
 
 
 	public void OnPointerClick ( PointerEventData data )
 	{
-		if ( map.editMode == WorldMap.EditMode.Play ) { return; }
+		Infopanel();
+
+		if ( map.editMode == WorldMap.EditMode.Play ) 
+		{
+			Interact();
+			return; 
+		}
 		FindNewHome();
 	}
 
 	public void OnDrop ( PointerEventData data )
 	{
-		if ( map.editMode == WorldMap.EditMode.Play ) { return; }
+		if ( map.editMode == WorldMap.EditMode.Room ) { return; }
 		FindNewHome();
 	}
 
-	void FindNewHome()
+	public void FindNewHome()
 	{
 		// Find closest floortile
 		FloorTile closestTile = map.FindClosestTile ( transform.position );
@@ -69,9 +75,6 @@ public class TokenBase : Archivable, IBeginDragHandler, IDragHandler, IEndDragHa
 		transform.SetParent ( homeTile.transform );
 		transform.localPosition = Vector3.zero;
 		transform.localScale = Vector3.one;
-//		Debug.Log ( string.Format ("Dropped {0} onto {1}, mounted to {2}", name, homeTile.name, transform.parent ) );
-
-		DebugOutput();
 	}
 
 	/// <summary>
@@ -82,16 +85,7 @@ public class TokenBase : Archivable, IBeginDragHandler, IDragHandler, IEndDragHa
 		// Each subclass handles clicks differently
 	}
 
-	void DebugOutput()
+	public virtual void Infopanel()
 	{
-//		string homeName = "No home"; if ( homeTile != null ) { homeName = homeTile.name; }
-//		string parentName = "Not parented"; if ( transform.parent != null ) { parentName = transform.parent.name; }
-//		string message = string.Format ( "Home tile: {0}\nParent: {1}", homeName, parentName );
-//		map.infoPanel.AddInfoDrawer ( name, name, message );
-
-		CharacterStats stats = new CharacterStats("Boris", "Jeff", 3, new int[]{10,16,10,12,10,10}, 20, 12, 30 );
-		stats.AddAttack ( new Attack ( "Sword", "Dx", 5, Attack.AttackType.Melee, 1, 1, 6, 2, "slashing" ) );
-		stats.AddAttack ( new Attack ( "Magic Missile", "In", 120, Attack.AttackType.Ranged, 1, 1, 4, 1, "radiant"));
-		map.infoPanel.AddCharacterDrawer ( stats );
 	}
 }

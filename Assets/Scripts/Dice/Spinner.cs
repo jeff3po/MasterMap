@@ -40,7 +40,6 @@ public class Spinner : MonoBehaviour
 	float currentSpin = 0;
 	public float spinRate;
 	List<SpinnerWedge> wedges = new List<SpinnerWedge>();
-	string action = "";
 
 	System.Action<int,bool> rollCallback;
 
@@ -67,12 +66,10 @@ public class Spinner : MonoBehaviour
 		rollValue.text = "Spin";
 		targetSpin = 0;
 		currentSpin = 0;
-		action = "";
 		spinState = SpinState.Unspun;
 
 		gameObject.SetActive ( true );
 		targetValue = target;
-		action = act;
 
 		int faceCount = dice.numberOfFaces;
 		modifier = dice.modifier;

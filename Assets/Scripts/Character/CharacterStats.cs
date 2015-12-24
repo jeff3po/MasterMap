@@ -22,6 +22,11 @@ public class CharacterStats
 	public int hitPoints_Current = 10;
 	public int hitPoints_Temporary = 0;
 
+	public CharacterStats()
+	{
+		// Default empty character
+	}
+
 	public CharacterStats ( string nm, string player, int lev, int[] abs, int maxHP, int ac, int spd )
 	{
 		characterName = nm;
@@ -52,6 +57,9 @@ public class CharacterStats
 			Debug.LogError ( "Must pass all six stats in order" );
 			return;
 		}
+
+		// Always start fresh
+		abilities = new Dictionary<string, int>();
 
 		for ( int i=0;i<abs.Length;i++ )
 		{

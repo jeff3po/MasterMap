@@ -37,7 +37,7 @@ public class ControlPanel : MonoBehaviour
 
 	public DrawingPanel drawingPanel;
 	public DecorationPanel decorationPanel;
-	public GameObject playPanel;
+	public PlayPanel playPanel;
 
 	public InsertDecoration decorationMode = InsertDecoration.None;
 	void Start()
@@ -54,7 +54,10 @@ public class ControlPanel : MonoBehaviour
 		LayoutElement buttonFrame = OpenButton_ToOpen.transform.parent.GetComponent<LayoutElement>();
 		float slideout = frame.rectTransform.sizeDelta.x - buttonFrame.preferredWidth;
 		_controlPanelClosed.x -= slideout;
-//		Debug.Log ( "slideout "+slideout );
+
+		drawingPanel.Setup( map );
+		decorationPanel.Setup ( map );
+		playPanel.Setup ( map );
 
 		drawingPanel.AddButton ( "Floors", DrawRooms );
 		drawingPanel.AddButton ( "Doors", SetDoors );
@@ -62,7 +65,13 @@ public class ControlPanel : MonoBehaviour
 		decorationPanel.AddButton ( "No deco", AddDeco_None );
 		decorationPanel.AddButton ( "Add pillar", AddDeco_Pillar );
 
+		playPanel.AddButton ( "New Character", NewCharacter );
 		map.SetEditMode ( WorldMap.EditMode.Room );
+	}
+
+	void NewCharacter()
+	{
+		map.DefineNewCharacter();
 	}
 
 	public void ChangePanel()

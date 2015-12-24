@@ -14,7 +14,7 @@ public class RoomManager : MonoBehaviour
 	public List<Room> rooms = new List<Room>();
 	public List<Door> doors = new List<Door>();
 
-	Room currentRoom = null;
+	public Room currentRoom = null;
 
 	public Door doorTemplate;
 

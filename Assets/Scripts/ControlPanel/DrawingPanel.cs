@@ -5,7 +5,6 @@ using System.Collections.Generic;
 
 public class DrawingPanel : ControlPanelSubpanel
 {
-	public WorldMap map;
 	public Dropdown roomPicker;
 	public InputField roomName;
 

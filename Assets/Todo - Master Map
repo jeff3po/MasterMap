@@ -10,4 +10,9 @@ Dec 23, 2015
 [] Allow movement of deco tokens only in Deco mode.
 [] Allow movement of player tockens only in Play mode.
 [] Info bar highlight active character and deco to left of scrolling info panels.
-
+[] Make WorldMap a singleton.
+[] Make ControlPanel a singleton
+[] Make infoPanel a singleton
+[] Make character generator a singleton
+[] Add exit button to char gen.
+[] Fix OnPointerClick on TokenBase

@@ -12,4 +12,19 @@ public class TokenCharacter : TokenDeco
 	{
 		stats = s;
 	}
+
+	public override void Interact()
+	{
+		map.infoPanel.AddCharacterDrawer ( stats );
+		base.Interact();
+	}
+
+	public override void Infopanel()
+	{
+		base.Infopanel();
+		stats.AddAttack ( new Attack ( "Sword", "Dx", 5, Attack.AttackType.Melee, 1, 1, 6, 2, "slashing" ) );
+		stats.AddAttack ( new Attack ( "Magic Missile", "In", 120, Attack.AttackType.Ranged, 1, 1, 4, 1, "radiant"));
+		map.infoPanel.AddCharacterDrawer ( stats );
+
+	}
 }

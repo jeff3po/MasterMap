@@ -7,9 +7,12 @@ using SimpleJSON;
 
 public class WorldMap : MonoBehaviour, IScrollHandler
 {
+	public TokenCharacter tokenCharacterTemplate;
+
 	public InfoPanel infoPanel;
 	public Spinner spinner;
 	public Chooser chooser;
+	public CharacterGenerator charGen;
 
 	public RectTransform tokenLayer;
 
@@ -171,13 +174,10 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 
 	void Update()
 	{
-		if ( Input.GetKeyDown(KeyCode.RightShift)) 
-		{ 
-			TestDice();
-		}
-
-
-
+//		if ( Input.GetKeyDown(KeyCode.RightShift)) 
+//		{ 
+//			TestDice();
+//		}
 		float scrollJump = 64.0f;
 		if ( Input.GetKeyDown(KeyCode.UpArrow)) { targetScrollPos += Vector3.up * scrollJump; }
 		if ( Input.GetKeyDown(KeyCode.DownArrow)) { targetScrollPos += Vector3.down * scrollJump; }
@@ -297,4 +297,53 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 			// manipulate the deco level
 		}
 	}
+
+	public void DefineNewCharacter()
+	{
+		// Enable gen and reset it
+		charGen.Init();
+	}
+
+	public void SpawnNewCharacter ( CharacterStats stats )
+	{
+		TokenCharacter token = Instantiate ( tokenCharacterTemplate );
+		token.gameObject.SetActive ( true );
+		token.transform.localScale = Vector3.one;
+		// Find a good spot
+		FloorTile tile = BestTileForSpawn();
+		token.transform.SetParent ( tokenLayer );
+		token.transform.position = tile.transform.position;
+		token.FindNewHome();
+		token.stats = stats;
+	}
+
+	FloorTile BestTileForSpawn()
+	{
+		FloorTile theTile = null;
+
+		Room goodRoom = roomManager.currentRoom;
+		if ( goodRoom == null )
+		{
+			if ( roomManager.rooms.Count > 0 )
+			{
+				goodRoom = roomManager.rooms[0];
+			}
+			else
+			{
+				// No room, just grab the middle tile
+				theTile = roomManager.allTiles [ roomManager.allTiles.Count/15];
+			}
+		}
+
+		if ( goodRoom != null )
+		{
+			foreach ( FloorTile t in goodRoom.tiles.Values )
+			{
+				// TODO: Ensure tile isn't occupied, other sanity checks
+				theTile = t;
+			}
+		}
+		return theTile;
+	}
+
 }
