@@ -5,14 +5,12 @@ using System.Collections;
 using System.Collections.Generic;
 using SimpleJSON;
 
-public class WorldMap : MonoBehaviour, IScrollHandler
+public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 {
 	public TokenCharacter tokenCharacterTemplate;
 
-	public InfoPanel infoPanel;
 	public Spinner spinner;
 	public Chooser chooser;
-	public CharacterGenerator charGen;
 
 	public RectTransform tokenLayer;
 
@@ -34,11 +32,6 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 	///  For one-finger zooming
 	/// </summary>
 	public Scrollbar zoomBar;
-
-	/// <summary>
-	/// Bottom bar UI
-	/// </summary>
-	public ControlPanel controlPanel;
 
 	FloorTile[,] worldGrid;
 
@@ -71,7 +64,7 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 	public void SetEditMode ( EditMode mode )
 	{
 		editMode = mode;
-		controlPanel.ShowPanel ( mode );
+		ControlPanel.Instance.ShowPanel ( mode );
 	}
 
 	void Start()
@@ -111,7 +104,7 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 				newTile.transform.SetParent ( roomManager.floorTileTemplate.transform.parent );
 				newTile.transform.localScale = Vector3.one;
 				newTile.transform.localPosition = new Vector3 ( (tileWidth) + (tileWidth * x), (tileHeight)+(tileHeight * y), 0 );
-				newTile.Setup ( this, x, y );
+				newTile.Setup ( x, y );
 				newTile.name = x+"_"+y;
 				worldGrid[x,y] = newTile;
 				newTile.transform.SetAsFirstSibling();
@@ -197,7 +190,7 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 
 	public void Scroll ( Vector2 scroll )
 	{
-		if ( controlPanel.CanDrag == false ) { return; }
+		if ( ControlPanel.Instance.CanDrag == false ) { return; }
 		targetScrollPos += (Vector3)scroll * 2f / zoomFactor;
 	}
 
@@ -280,7 +273,7 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 		//		Debug.Log ( "Clicked "+tile.name);
 
 		// Dragging instead of manipulating 
-		if ( controlPanel.CanDrag ) { return; }
+		if ( ControlPanel.Instance.CanDrag ) { return; }
 
 		if ( editMode == EditMode.Play )
 		{
@@ -301,7 +294,7 @@ public class WorldMap : MonoBehaviour, IScrollHandler
 	public void DefineNewCharacter()
 	{
 		// Enable gen and reset it
-		charGen.Init();
+		CharacterGenerator.Instance.Init();
 	}
 
 	public void SpawnNewCharacter ( CharacterStats stats )

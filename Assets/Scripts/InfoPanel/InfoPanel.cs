@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// Panel in the bar at top of screen
 /// </summary>
-public class InfoPanel : MonoBehaviour 
+public class InfoPanel : SingletonMonoBehaviour<InfoPanel> 
 {
 	public InfoDrawer infoDrawerTemplate;
 	public CharacterDrawer characterDrawerTemplate;

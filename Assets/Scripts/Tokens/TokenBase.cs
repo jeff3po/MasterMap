@@ -12,7 +12,6 @@ public class TokenBase : Archivable, IBeginDragHandler, IDragHandler, IEndDragHa
 {
 	public Image frame;
 	public FloorTile homeTile = null;
-	public WorldMap map;
 	public RectTransform tokenLayer;
 	bool _isMobile = true;
 
@@ -29,7 +28,7 @@ public class TokenBase : Archivable, IBeginDragHandler, IDragHandler, IEndDragHa
 
 	public void OnBeginDrag ( PointerEventData data )
 	{
-		if ( map.editMode == WorldMap.EditMode.Room ) { return; }
+		if ( WorldMap.Instance.editMode == WorldMap.EditMode.Room ) { return; }
 			
 		transform.SetParent ( tokenLayer );
 		homeTile = null;
@@ -38,13 +37,13 @@ public class TokenBase : Archivable, IBeginDragHandler, IDragHandler, IEndDragHa
 
 	public void OnDrag ( PointerEventData data)
 	{
-		if ( map.editMode == WorldMap.EditMode.Room ) { return; }
+		if ( WorldMap.Instance.editMode == WorldMap.EditMode.Room ) { return; }
 		transform.Translate ( data.delta );
 	}
 
 	public void OnEndDrag ( PointerEventData data )
 	{
-		if ( map.editMode == WorldMap.EditMode.Room ) { return; }
+		if ( WorldMap.Instance.editMode == WorldMap.EditMode.Room ) { return; }
 		FindNewHome();
 	}
 
@@ -53,7 +52,7 @@ public class TokenBase : Archivable, IBeginDragHandler, IDragHandler, IEndDragHa
 	{
 		Infopanel();
 
-		if ( map.editMode == WorldMap.EditMode.Play ) 
+		if ( WorldMap.Instance.editMode == WorldMap.EditMode.Play ) 
 		{
 			Interact();
 			return; 
@@ -63,14 +62,14 @@ public class TokenBase : Archivable, IBeginDragHandler, IDragHandler, IEndDragHa
 
 	public void OnDrop ( PointerEventData data )
 	{
-		if ( map.editMode == WorldMap.EditMode.Room ) { return; }
+		if ( WorldMap.Instance.editMode == WorldMap.EditMode.Room ) { return; }
 		FindNewHome();
 	}
 
 	public void FindNewHome()
 	{
 		// Find closest floortile
-		FloorTile closestTile = map.FindClosestTile ( transform.position );
+		FloorTile closestTile = WorldMap.Instance.FindClosestTile ( transform.position );
 		homeTile = closestTile;
 		transform.SetParent ( homeTile.transform );
 		transform.localPosition = Vector3.zero;

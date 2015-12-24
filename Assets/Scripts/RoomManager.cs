@@ -57,8 +57,8 @@ public class RoomManager : MonoBehaviour
 		Room newRoom = go.AddComponent<Room>();
 		newRoom.roomManager = this;
 		newRoom.SetupArchive();
-		newRoom.Setup(rooms.Count,map);
-		map.controlPanel.visPanel.AddRoomToggle ( rooms.Count, newRoom.roomColor);
+		newRoom.Setup(rooms.Count);
+		ControlPanel.Instance.visPanel.AddRoomToggle ( rooms.Count, newRoom.roomColor);
 		rooms.Add ( newRoom );
 		SetCurrentRoom ( newRoom );
 		return newRoom;
@@ -411,7 +411,7 @@ public class RoomManager : MonoBehaviour
 		{
 			Room newRoom = MakeNewRoom();
 			newRoom.Init( ref data, i );
-			map.controlPanel.drawingPanel.ResetPicker();
+			ControlPanel.Instance.drawingPanel.ResetPicker();
 		}
 
 		int doorCount = data [ "World" ] [ "doorCount" ].AsInt ;

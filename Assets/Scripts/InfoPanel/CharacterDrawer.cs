@@ -105,7 +105,7 @@ public class CharacterDrawer : InfoDrawer
 		int statMod = stats.SkillModifier ( currentAttack.abilityForRoll );
 		statMod += currentAttack.plusToHit;
 
-		map.spinner.SpinTheWheel ( new Dice ( 1,20,statMod), ResultOfAttackRoll, targetRoll, "to hit" );
+		WorldMap.Instance.spinner.SpinTheWheel ( new Dice ( 1,20,statMod), ResultOfAttackRoll, targetRoll, "to hit" );
 
 	}
 
@@ -131,7 +131,7 @@ public class CharacterDrawer : InfoDrawer
 		if ( rollForDamage )
 		{
 			rollForDamage = false;
-			map.spinner.SpinTheWheel ( currentAttack.damageDice, ResultOfDamageRoll, -999, "damage" );
+			WorldMap.Instance.spinner.SpinTheWheel ( currentAttack.damageDice, ResultOfDamageRoll, -999, "damage" );
 		}
 	}
 

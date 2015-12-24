@@ -3,9 +3,8 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-public class CharacterGenerator : MonoBehaviour 
+public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator> 
 {
-	public WorldMap map;
 	public Image frame;
 	public CharGen_Ability abilityButtonTemplate;
 
@@ -28,6 +27,7 @@ public class CharacterGenerator : MonoBehaviour
 		AddAbilityButton ( "AC", 10, 1, 20, 1 );
 		AddAbilityButton ( "Spd", 20, 5, 50, 5 );
 		AddAbilityButton ( "Lvl", 1, 1, 20, 1 );
+		gameObject.SetActive( false );
 	}
 
 	public void Init()
@@ -84,8 +84,13 @@ public class CharacterGenerator : MonoBehaviour
 
 		stats = new CharacterStats ( charName, playerName, level, abilities, hp, ac, spd );
 
-		map.SpawnNewCharacter(stats);
+		WorldMap.Instance.SpawnNewCharacter(stats);
 
+		gameObject.SetActive ( false );
+	}
+
+	public void Cancel()
+	{
 		gameObject.SetActive ( false );
 	}
 }

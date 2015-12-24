@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 
-public class ControlPanel : MonoBehaviour 
+public class ControlPanel : SingletonMonoBehaviour<ControlPanel> 
 {
 	public enum DrawingPanelMode
 	{
@@ -13,8 +13,6 @@ public class ControlPanel : MonoBehaviour
 	}
 
 	public DrawingPanelMode drawingPanelMode = DrawingPanelMode.Floor;
-
-	public WorldMap map;
 
 	public RoomVisibilityPanel visPanel;
 
@@ -55,9 +53,9 @@ public class ControlPanel : MonoBehaviour
 		float slideout = frame.rectTransform.sizeDelta.x - buttonFrame.preferredWidth;
 		_controlPanelClosed.x -= slideout;
 
-		drawingPanel.Setup( map );
-		decorationPanel.Setup ( map );
-		playPanel.Setup ( map );
+		drawingPanel.Setup();
+		decorationPanel.Setup();
+		playPanel.Setup();
 
 		drawingPanel.AddButton ( "Floors", DrawRooms );
 		drawingPanel.AddButton ( "Doors", SetDoors );
@@ -66,12 +64,12 @@ public class ControlPanel : MonoBehaviour
 		decorationPanel.AddButton ( "Add pillar", AddDeco_Pillar );
 
 		playPanel.AddButton ( "New Character", NewCharacter );
-		map.SetEditMode ( WorldMap.EditMode.Room );
+		WorldMap.Instance.SetEditMode ( WorldMap.EditMode.Room );
 	}
 
 	void NewCharacter()
 	{
-		map.DefineNewCharacter();
+		WorldMap.Instance.DefineNewCharacter();
 	}
 
 	public void ChangePanel()
@@ -79,19 +77,19 @@ public class ControlPanel : MonoBehaviour
 		string option = editModeDropdown.captionText.text;
 		if ( option == "Deco")
 		{
-			map.SetEditMode ( WorldMap.EditMode.Deco );
+			WorldMap.Instance.SetEditMode ( WorldMap.EditMode.Deco );
 			ShowPanel ( WorldMap.EditMode.Deco );
 		}
 		else
 		if ( option == "Room")
 		{
-			map.SetEditMode ( WorldMap.EditMode.Room );
+			WorldMap.Instance.SetEditMode ( WorldMap.EditMode.Room );
 			ShowPanel ( WorldMap.EditMode.Room );
 		}
 		else
 		if ( option == "Play")
 		{
-			map.SetEditMode ( WorldMap.EditMode.Play );
+			WorldMap.Instance.SetEditMode ( WorldMap.EditMode.Play );
 			ShowPanel ( WorldMap.EditMode.Play );
 		}
 	}

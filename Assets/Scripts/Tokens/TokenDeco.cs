@@ -14,7 +14,7 @@ public class TokenDeco : TokenBase
 	{
 		base.Interact();
 
-		if ( map.editMode != WorldMap.EditMode.Play ) 
+		if ( WorldMap.Instance.editMode != WorldMap.EditMode.Play ) 
 		{
 			return;
 		}
@@ -29,7 +29,7 @@ public class TokenDeco : TokenBase
 				// Show entries
 				foreach ( string act in alist.activities.Keys )
 				{
-					map.chooser.AddButton(act,ChooseThisActivity);
+					WorldMap.Instance.chooser.AddButton(act,ChooseThisActivity);
 					display += "\n"+act;
 				}
 			}
@@ -62,7 +62,7 @@ public class TokenDeco : TokenBase
 //		statMod += currentAttack.plusToHit;
 		int targetRoll = currentActivity.difficulty;
 
-		map.spinner.SpinTheWheel ( new Dice ( 1,20,0), activityResult, targetRoll, "to "+currentActivity.Name );
+		WorldMap.Instance.spinner.SpinTheWheel ( new Dice ( 1,20,0), activityResult, targetRoll, "to "+currentActivity.Name );
 	}
 
 	Activity currentActivity = null;

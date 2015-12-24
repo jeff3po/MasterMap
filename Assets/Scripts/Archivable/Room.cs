@@ -14,10 +14,10 @@ public class Room : Archivable
 
 	public Color roomColor = Color.white;
 
-	public void Setup ( int index, WorldMap map )
+	public void Setup ( int index )
 	{
 		Name = "Room"+index;
-		roomColor = map.globalColors[index];
+		roomColor = WorldMap.Instance.globalColors[index];
 	}
 
 	public override void SetupArchive()

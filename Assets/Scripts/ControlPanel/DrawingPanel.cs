@@ -10,7 +10,7 @@ public class DrawingPanel : ControlPanelSubpanel
 
 	public void AddRoom()
 	{
-		map.AddRoom();
+		WorldMap.Instance.AddRoom();
 
 		ResetPicker();
 	}
@@ -22,7 +22,7 @@ public class DrawingPanel : ControlPanelSubpanel
 		List<Dropdown.OptionData> data = new List<Dropdown.OptionData>();
 		data.Add ( new Dropdown.OptionData ( "None" ) );
 		string current = "";
-		foreach ( Room r in map.roomManager.rooms )
+		foreach ( Room r in WorldMap.Instance.roomManager.rooms )
 		{
 			data.Add ( new Dropdown.OptionData ( r.Name ) );
 			current = r.Name;
@@ -54,7 +54,7 @@ public class DrawingPanel : ControlPanelSubpanel
 
 	public void ChangeRoomName()
 	{
-		if ( map.SetCurrentRoomName ( roomName.text ) )
+		if ( WorldMap.Instance.SetCurrentRoomName ( roomName.text ) )
 		{
 			ResetPicker(roomName.text);
 		}
@@ -62,14 +62,14 @@ public class DrawingPanel : ControlPanelSubpanel
 
 	public void RoomUp()
 	{
-		int newRoomIndex = map.RoomShift(1);
+		int newRoomIndex = WorldMap.Instance.RoomShift(1);
 		newRoomIndex++;
 		roomName.text = roomPicker.options[newRoomIndex].text;
 	}
 
 	public void RoomDown()
 	{
-		int newRoomIndex = map.RoomShift(-1);
+		int newRoomIndex = WorldMap.Instance.RoomShift(-1);
 		newRoomIndex++;
 		roomName.text = roomPicker.options[newRoomIndex].text;
 	}
@@ -81,11 +81,11 @@ public class DrawingPanel : ControlPanelSubpanel
 		if ( index == -1 )
 		{
 			roomName.text = "";
-			map.SetCurrentRoom ( null );
+			WorldMap.Instance.SetCurrentRoom ( null );
 		}
 		else
 		{
-			roomName.text = map.SetCurrentRoom(index).Name;
+			roomName.text = WorldMap.Instance.SetCurrentRoom(index).Name;
 		}
 	}
 }

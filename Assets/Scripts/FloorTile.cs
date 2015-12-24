@@ -12,11 +12,6 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 	static public bool touching = false;
 
 	/// <summary>
-	/// Link to main interface
-	/// </summary>
-	WorldMap map;
-
-	/// <summary>
 	/// Default image. Overridden by other factors
 	/// </summary>
 	public Image floorImage;
@@ -96,9 +91,8 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 		floorImage.color = c;
 	}
 
-	public void Setup ( WorldMap m, int x, int y )
+	public void Setup ( int x, int y )
 	{
-		map = m;
 		xPos = x;
 		yPos = y;
 	}
@@ -112,7 +106,7 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 	void ClickThisTile()
 	{
 		// Go thorugh map first. It filters out the current state of everything
-		map.ClickThisTile(this);
+		WorldMap.Instance.ClickThisTile(this);
 	}
 
 	public void OnPointerEnter(PointerEventData data)
@@ -126,7 +120,7 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 
 	public void OnScroll(PointerEventData data)
 	{
-		map.OnScroll(data);
+		WorldMap.Instance.OnScroll(data);
 	}
 
 	/// <summary>
@@ -136,7 +130,7 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 	public void OnDrag(PointerEventData data)
 	{
 		//Debug.Log ( "Drag "+data.delta );
-		map.Scroll(data.delta);
+		WorldMap.Instance.Scroll(data.delta);
 	}
 
 //	public void OnEndDrag(PointerEventData data)
@@ -166,7 +160,7 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 	public void EndTouch()
 	{
 		touching = false;
-		map.roomManager.ResetAddFloorState();
+		WorldMap.Instance.roomManager.ResetAddFloorState();
 	}
 
 	public void AttachDoor ( Door door )

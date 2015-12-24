@@ -3,14 +3,10 @@ using System.Collections;
 
 public class ControlPanelSubpanel : MonoBehaviour 
 {
-	[HideInInspector]
-	public WorldMap map;
-
 	public ControlPanelButton buttonTemplate;
 
-	public virtual void Setup ( WorldMap m )
+	public virtual void Setup()
 	{
-		map = m;
 	}
 
 	public void AddButton ( string nm, System.Action callback )
