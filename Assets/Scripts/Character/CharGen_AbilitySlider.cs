@@ -13,29 +13,79 @@ public class CharGen_AbilitySlider : MonoBehaviour, IPointerDownHandler, IPointe
 	public Text value;
 	public Image slider;
 	public Image valueTemplate;
+	public RectTransform centerMark;
+	string[] strings;
+	[HideInInspector]
+	public bool usesStrings = false;
 
+	public bool horizontal = true;
+
+	int minValue = 0;
 	int currentValue = 10;
+	string currentString = "";
 
 	List<Image> valueTabs = new List<Image>();
 
-	public void Setup ( int initValue, int min, int max, int step ) 
+	void SetDisplayedValue()
 	{
+		string textToDisplay = currentString;
+
+		if ( usesStrings == false )
+		{
+			currentValue = int.Parse ( textToDisplay );
+
+			if ( minValue < 0 )
+			{
+				// Since we care about negative values, add + to 0 so there's always a sign
+				if ( currentValue == 0 )
+				{
+					textToDisplay = "+"+textToDisplay;
+				}
+			}
+		}
+		value.text = textToDisplay;
+	}
+
+	public void Setup ( int initValue, int min, int max, int step, string[] str=null ) 
+	{
+		minValue = min;
 		currentValue = initValue;
+		currentString = initValue+"";
+
+		if ( str != null )
+		{
+			usesStrings = true;
+			strings = str;
+			currentString = strings [ initValue ];
+		}
 
 		valueTemplate.gameObject.SetActive ( false );
 		slider.gameObject.SetActive ( false );
-		currentValue = int.Parse ( value.text );
+
+		SetDisplayedValue();
 
 		if ( valueTabs.Count == 0 )
 		{
-			// Array the numbers
-			for ( int i=min;i<=max;i+=step)
+			// Array the numbers. Inclusive of max value except when using a string list 
+			int count = max+1;
+			if ( usesStrings ) { count = strings.Length; }
+			for ( int i=min;i<count;i+=step)
 			{
 				Image val = Instantiate ( valueTemplate );
 				val.gameObject.SetActive ( true );
 				val.transform.SetParent ( valueTemplate.transform.parent );
 				val.transform.localScale = Vector3.one;
-				val.GetComponentInChildren<Text>().text = i+"";
+				string numberToDisplay = ""+i;
+				if ( usesStrings ) { numberToDisplay = strings[i]; }
+				if ( min < 0 )
+				{
+					// We care about negative values, so add + 
+					if ( i > 0 )
+					{
+						numberToDisplay = "+"+i;
+					}
+				}
+				val.GetComponentInChildren<Text>().text = numberToDisplay;
 				valueTabs.Add ( val );
 			}
 		}
@@ -47,23 +97,33 @@ public class CharGen_AbilitySlider : MonoBehaviour, IPointerDownHandler, IPointe
 	{
 		if ( updateDistance == 0 )
 		{
-			updateDistance = value.rectTransform.sizeDelta.x *0.25f;
+			updateDistance = value.rectTransform.sizeDelta.x *0.1f;
 		}
 
 		Vector2 delta = data.delta;
-		delta.y = 0;
+		if ( horizontal )
+		{
+			delta.y = 0;
+		}
+		else
+		{
+			delta.x = 0;
+		}
 		slider.transform.Translate ( delta );
 
 		updatedDrag += delta;
 
-		if ( Mathf.Abs ( updatedDrag.x ) > updateDistance )
+		float updateDist = updatedDrag.x;
+		if ( !horizontal) { updateDist = updatedDrag.y; }
+
+		if ( Mathf.Abs ( updateDist ) > updateDistance )
 		{
 			updatedDrag = Vector3.zero;
 			// Each time it moves, find the closest number on the strip to the unerlying value field. 
 			float closestDist = 99999;
 			foreach ( Image tab in valueTabs )
 			{
-				float dist = (tab.transform.position - value.transform.position + (Vector3.left * tab.rectTransform.sizeDelta.x*0.25f) ).magnitude;
+				float dist = (tab.transform.position - centerMark.position).magnitude;
 
 				if ( dist < closestDist )
 				{
@@ -87,8 +147,10 @@ public class CharGen_AbilitySlider : MonoBehaviour, IPointerDownHandler, IPointe
 			{
 				tab.DOKill();
 				tab.DOFade ( 1.0f, 0.1f );
-				currentValue = int.Parse ( tab.GetComponentInChildren<Text>().text );
-				value.text = currentValue+"";
+
+				currentString = tab.GetComponentInChildren<Text>().text;
+
+				SetDisplayedValue();
 			}
 			else
 			{

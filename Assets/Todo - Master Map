@@ -7,8 +7,9 @@ Todo - Master Map
 [] Allow movement of deco tokens only in Deco mode.
 [] Allow movement of player tockens only in Play mode.
 [] Info bar highlight active character and deco to left of scrolling info panel history.
-[] Make character generator a singleton
 [] Fix OnPointerClick on TokenBase
+[] Apply attack definition to characterStats in Character Generator.
+[] Archive character (stats and attacks)
 
 Dec 23, 2015
 [x] Reset attack dropdown on select. Rename entry 0 to "Select Attack".
@@ -18,4 +19,6 @@ Dec 24, 2015
 [x] Make WorldMap a singleton.
 [x] Make ControlPanel a singleton
 [x] Make InfoPanel a singleton
+[x] Make character generator a singleton
 [x] Add exit button to char gen.
+[x] Add attack definition fields to chargen

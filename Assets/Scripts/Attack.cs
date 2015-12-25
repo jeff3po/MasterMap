@@ -9,7 +9,7 @@ public class Attack
 	/// <summary>
 	/// Static list for use throughout game
 	/// </summary>
-	public static string[] DamageType = new string[]{"acid","bludgeoning","cold","fire","lightning","necrotic","piercing","poison","psychic","radiant","slashing","thunder"};
+	public static string[] DamageType = new string[]{"Acid","Bludgeon","Cold","Fire","Lightning","Necrotic","Piercing","Poison","Psychic","Radiant","Slashing","Thunder"};
 
 	public enum AttackType { Undefined, Melee, Ranged };
 
