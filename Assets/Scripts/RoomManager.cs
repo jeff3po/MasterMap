@@ -388,6 +388,13 @@ public class RoomManager : MonoBehaviour
 		}
 		data [ "World" ] ["doorCount"].AsInt = doorCount;
 
+		int charCount = 0;
+		foreach ( TokenCharacter chars in WorldMap.Instance.characterTokens )
+		{
+			chars.Export ( ref data, charCount );
+			charCount ++;
+		}
+		data [ "World" ] ["charCount"].AsInt = charCount;
 
 		string jsonstring = data.ToString();
 		PlayerPrefs.SetString ( "savefile", jsonstring );
@@ -410,7 +417,7 @@ public class RoomManager : MonoBehaviour
 		for ( int i=0;i<roomCount;i++)
 		{
 			Room newRoom = MakeNewRoom();
-			newRoom.Init( ref data, i );
+			newRoom.Init ( data, i );
 			ControlPanel.Instance.drawingPanel.ResetPicker();
 		}
 
@@ -418,8 +425,26 @@ public class RoomManager : MonoBehaviour
 		for ( int i=0;i<doorCount;i++)
 		{
 			Door newDoor = Instantiate ( doorTemplate );
-			newDoor.Init( ref data, i );
+			newDoor.Init ( data, i );
 			doors.Add ( newDoor );
+		}
+
+		// Clear any prior
+		foreach ( TokenCharacter token in WorldMap.Instance.characterTokens )
+		{
+			Destroy ( token.gameObject );
+		}
+		WorldMap.Instance.characterTokens.Clear();
+
+		int charCount = data [ "World" ] ["charCount"].AsInt;
+		for ( int i=0;i<charCount;i++ )
+		{
+			TokenCharacter token = Instantiate ( WorldMap.Instance.tokenCharacterTemplate);
+			token.gameObject.SetActive ( true );
+			token.transform.SetParent ( WorldMap.Instance.tokenLayer);
+			token.transform.localScale = Vector3.one;
+			token.Init ( data, i );
+			WorldMap.Instance.characterTokens.Add ( token );
 		}
 
 		foreach ( Room r in rooms )
@@ -429,6 +454,10 @@ public class RoomManager : MonoBehaviour
 		foreach ( Door d in doors )
 		{
 			d.PostInit();
+		}
+		foreach ( TokenCharacter ch in WorldMap.Instance.characterTokens )
+		{
+			ch.PostInit();
 		}
 	}
 

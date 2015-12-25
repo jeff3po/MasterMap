@@ -109,13 +109,11 @@ public class Door : TokenDeco
 		Setup ( roomManager, homeTile, facing );
 	}
 
-	string homeTileID = "";
-
-	public override void Init (ref JSONNode data, int i )
+	public override void Init ( JSONNode data, int i )
 	{
 		SetupArchive();
 
-		base.Init (ref data, i );
+		base.Init ( data, i );
 
 		homeTileID = data [ Category ] [ i ] [ "tileID" ];
 		string facingString = data [ Category ] [ i ] [ "facing" ];

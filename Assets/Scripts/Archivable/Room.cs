@@ -142,11 +142,11 @@ public class Room : Archivable
 		}
 	}
 
-	public override void Init(ref JSONNode data, int i )
+	public override void Init ( JSONNode data, int i )
 	{
 		tileIDs.Clear();
 
-		base.Init (ref data, i );
+		base.Init ( data, i );
 		int tileCount = data [ Category ] [ i ] [ "tileCount" ].AsInt;
 		for ( int tc=0;tc<tileCount;tc++)
 		{

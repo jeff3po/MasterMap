@@ -17,6 +17,8 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 
 	public Image mapBG;
 
+	public List<TokenCharacter> characterTokens = new List<TokenCharacter>();
+
 	/// <summary>
 	/// Screen navigation - scrolling
 	/// </summary>
@@ -309,6 +311,7 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 		token.transform.position = tile.transform.position;
 		token.FindNewHome();
 		token.stats = stats;
+		characterTokens.Add ( token );
 	}
 
 	FloorTile BestTileForSpawn()

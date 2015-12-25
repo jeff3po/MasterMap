@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using SimpleJSON;
 
 /// <summary>
 /// An action that can be taken.  
@@ -149,5 +150,19 @@ public class Activity
 		}
 
 		return success;
+	}
+
+	public Activity ( JSONNode data, int tokenIndex, int listIndex, int actIndex )
+	{
+		Name = data [ "Activity" ] [ tokenIndex ] [ "name" ] [ listIndex ] [ actIndex ];
+		difficulty = data [ "Activity" ] [ tokenIndex ] [ "diff" ] [ listIndex ] [ actIndex ].AsInt;
+		vsAbility = data [ "Activity" ] [ tokenIndex ] [ "abil" ] [ listIndex ] [ actIndex ];
+	}
+
+	public void Export ( ref JSONNode data, int tokenIndex, int listIndex, int actIndex )
+	{
+		data [ "Activity" ] [ tokenIndex ] [ "name" ] [ listIndex ] [ actIndex ]= Name;
+		data [ "Activity" ] [ tokenIndex ] [ "diff" ] [ listIndex ] [ actIndex ].AsInt = difficulty;
+		data [ "Activity" ] [ tokenIndex ] [ "abil" ] [ listIndex ] [ actIndex ] = vsAbility;
 	}
 }

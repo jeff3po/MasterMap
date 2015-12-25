@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using SimpleJSON;
 
 /// <summary>
 /// The definition of a set of dice to roll. Convenient to store/pass around
@@ -15,5 +16,20 @@ public class Dice
 		numberOfFaces = face;
 		numberToRoll = num;
 		modifier = mod;
+	}
+
+	public Dice ( JSONNode data, int tokenIndex, int attackIndex )
+	{
+		numberToRoll = data [ "Dice" ] [ tokenIndex ] [ "rolls" ] [ attackIndex ].AsInt;
+		numberOfFaces = data [ "Dice" ] [ tokenIndex ] [ "faces" ] [ attackIndex ].AsInt;
+		modifier = data [ "Dice" ] [ tokenIndex ] [ "mod" ] [ attackIndex ].AsInt;
+	}
+
+	public void Export ( ref JSONNode data, int tokenIndex, int attackIndex )
+	{
+		data [ "Dice" ] [ tokenIndex ] [ "rolls" ] [ attackIndex ].AsInt = numberToRoll;
+		data [ "Dice" ] [ tokenIndex ] [ "faces" ] [ attackIndex ].AsInt = numberOfFaces;
+		data [ "Dice" ] [ tokenIndex ] [ "mod" ] [ attackIndex ].AsInt = modifier;
+
 	}
 }

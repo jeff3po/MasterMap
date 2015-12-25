@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using SimpleJSON;
 
 /// <summary>
 /// Base stats, derived stats and helper functions to perform dice rolls for a character
@@ -74,5 +75,60 @@ public class CharacterStats
 		abilities.TryGetValue ( abilityName, out ability );
 		int delta = ability - 10;
 		return delta/2;
+	}
+
+	public CharacterStats ( JSONNode data, int tokenIndex )
+	{
+		characterName = data [ "Stats" ] [ tokenIndex ] [ "charName" ];
+		playerName = data [ "Stats" ] [ tokenIndex ] [ "playName" ];
+		level = data [ "Stats" ] [ tokenIndex ] [ "lev" ].AsInt;
+		armorClass = data [ "Stats" ] [ tokenIndex ] [ "ac" ].AsInt;
+		speed = data [ "Stats" ] [ tokenIndex ] [ "spd" ].AsInt;
+		hitPoints_Max = data [ "Stats" ] [ tokenIndex ] [ "hpMax" ].AsInt;
+		hitPoints_Current = data [ "Stats" ] [ tokenIndex ] [ "hpCur" ].AsInt;
+		hitPoints_Temporary = data [ "Stats" ] [ tokenIndex ] [ "hpTemp" ].AsInt;
+
+		abilities.Clear();
+
+		foreach ( string ab in abilityNames )
+		{
+			int abilityValue = data [ "Stats" ] [ tokenIndex ] [ "Abilities" ] [ ab ].AsInt;
+			abilities.Add ( ab, abilityValue );
+		}
+
+		attacks.Clear();
+		int attackIndex = data [ "Stats" ] [ tokenIndex ] [ "attackCount" ].AsInt;
+		for ( int a=0;a<attackIndex;a++)
+		{
+			Attack at = new Attack ( data, tokenIndex, a );
+			attacks.Add ( at.title, at );
+		}
+	}
+
+	public void Export ( ref JSONNode data, int tokenIndex )
+	{
+		data [ "Stats" ] [ tokenIndex ] [ "charName" ] = characterName;
+		data [ "Stats" ] [ tokenIndex ] [ "playName" ] = playerName;
+		data [ "Stats" ] [ tokenIndex ] [ "lev" ].AsInt = level;
+		data [ "Stats" ] [ tokenIndex ] [ "ac" ].AsInt = armorClass;
+		data [ "Stats" ] [ tokenIndex ] [ "spd" ].AsInt = speed;
+		data [ "Stats" ] [ tokenIndex ] [ "hpMax" ].AsInt = hitPoints_Max;
+		data [ "Stats" ] [ tokenIndex ] [ "hpCur" ].AsInt = hitPoints_Current;
+		data [ "Stats" ] [ tokenIndex ] [ "hpTemp" ].AsInt = hitPoints_Temporary;
+
+		foreach ( string ab in abilityNames )
+		{
+			int statVal = 0;
+			abilities.TryGetValue ( ab, out statVal );
+			data [ "Stats" ] [ tokenIndex ] [ "Abilities" ] [ ab ].AsInt = statVal;
+		}
+
+		int attackIndex = 0;
+		foreach ( Attack a in attacks.Values )
+		{
+			a.Export ( ref data, tokenIndex, attackIndex );
+			attackIndex ++;
+		}
+		data [ "Stats" ] [ tokenIndex ] [ "attackCount" ].AsInt = attackIndex;
 	}
 }

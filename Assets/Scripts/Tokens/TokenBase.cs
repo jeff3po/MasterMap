@@ -3,6 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using SimpleJSON;
 
 /// <summary>
 /// Base token type. Draggable and droppable from/to FloorTiles. 
@@ -86,5 +87,47 @@ public class TokenBase : Archivable, IBeginDragHandler, IDragHandler, IEndDragHa
 
 	public virtual void Infopanel()
 	{
+	}
+
+	[HideInInspector]
+	public string homeTileID = "";
+
+	public override void PostInit()
+	{
+		base.PostInit();
+		// Find hometile 
+		homeTile = WorldMap.Instance.roomManager.FindTileByID(homeTileID);
+	}
+
+	public override void Init ( JSONNode data, int tokenIndex )
+	{
+		base.Init ( data, tokenIndex );
+		homeTileID = data [ Category ] [ tokenIndex ] [ "hometile" ];
+		_isMobile = data [ Category ] [ tokenIndex ] [ "isMobile" ].AsBool;
+
+		int listCount = data [ Category ] [ tokenIndex ] [ "listCount" ].AsInt;
+		for ( int listIndex=0;listIndex<listCount;listIndex++)
+		{
+			ActivityList newList = new ActivityList( data, tokenIndex, listIndex );
+			allPossibleActivities.Add ( newList.title, newList );
+		}
+	}
+
+	public override void Export(ref JSONNode data, int tokenIndex)
+	{
+		base.Export(ref data, tokenIndex);
+		data [ Category ] [ tokenIndex ] [ "hometile" ] = homeTile.UniqueID();
+		data [ Category ] [ tokenIndex ] [ "isMobile" ].AsBool = _isMobile;
+
+		int listCount = 0;
+		if ( allPossibleActivities != null )
+		{
+			foreach ( ActivityList list in allPossibleActivities.Values )
+			{
+				list.Export(ref data, tokenIndex, listCount );
+				listCount ++;
+			}
+			data [ Category ] [ tokenIndex ] [ "listCount" ].AsInt = listCount;
+		}
 	}
 }

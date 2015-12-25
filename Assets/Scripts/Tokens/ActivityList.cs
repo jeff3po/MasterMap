@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using SimpleJSON;
 
 /// <summary>
 /// A list of activities. Contains prerequisite(s) before being available to player.
@@ -30,5 +31,30 @@ public class ActivityList
 	public void AddActivity ( Activity activity )
 	{
 		activities.Add ( activity.Name, activity );
+	}
+
+	public ActivityList ( JSONNode data, int tokenIndex, int listIndex )
+	{
+		activities.Clear();
+
+		int activityCount = data [ "ActivityList" ] [ tokenIndex ] [ "activityCount" ] [ listIndex ].AsInt;
+		for ( int actIndex=0;actIndex<activityCount;actIndex++ )
+		{
+			Activity activity = new Activity( data, tokenIndex, listIndex, actIndex );
+			activities.Add ( activity.Name, activity );
+		}
+	}
+
+
+	public void Export ( ref JSONNode data, int tokenIndex, int listIndex )
+	{
+		data [ "ActivityList" ] [ tokenIndex ] [ "accessible" ].AsBool = accessible;
+		int activityCount = 0;
+		foreach ( Activity act in activities.Values )
+		{
+			act.Export ( ref data, tokenIndex, listIndex, activityCount );
+			activityCount ++;
+		}
+		data [ "ActivityList" ] [ tokenIndex ] [ "activityCount" ] [listIndex].AsInt = activityCount;
 	}
 }

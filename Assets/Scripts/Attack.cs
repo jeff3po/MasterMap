@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using SimpleJSON;
 
 /// <summary>
 /// A definition of a single damage-producing effect
@@ -108,5 +109,28 @@ public class Attack
 		resultString += critResult;
 
 		return damage;
+	}
+
+	public Attack ( JSONNode data, int tokenIndex, int attackIndex )
+	{
+		title = data [ "Attack" ] [ tokenIndex ] [ "title" ] [ attackIndex ];
+		abilityForRoll = data [ "Attack" ] [ tokenIndex ] [ "ability"] [ attackIndex ];
+		string attackTypeName = data [ "Attack" ] [ tokenIndex ] [ "attackType"] [ attackIndex ];
+		attackType = (AttackType) System.Enum.Parse ( typeof (AttackType), attackTypeName );
+		range = data [ "Attack" ] [ tokenIndex ] [ "range"] [ attackIndex ].AsInt;
+		plusToHit = data [ "Attack" ] [ tokenIndex ] [ "toHit"] [ attackIndex ].AsInt;
+		damageType = data [ "Attack" ] [ tokenIndex ] [ "damage"] [ attackIndex ];
+		damageDice = new Dice ( data, tokenIndex, attackIndex );
+	}
+
+	public void Export ( ref JSONNode data, int tokenIndex, int attackIndex )
+	{
+		data [ "Attack" ] [ tokenIndex ] [ "title" ] [ attackIndex ] = title;
+		data [ "Attack" ] [ tokenIndex ] [ "ability"] [ attackIndex ] = abilityForRoll;
+		data [ "Attack" ] [ tokenIndex ] [ "attackType"] [ attackIndex ] = attackType.ToString();
+		data [ "Attack" ] [ tokenIndex ] [ "range"] [ attackIndex ].AsInt = range;
+		data [ "Attack" ] [ tokenIndex ] [ "toHit"] [ attackIndex ].AsInt = plusToHit;
+		data [ "Attack" ] [ tokenIndex ] [ "damage"] [ attackIndex ] = damageType;
+		damageDice.Export ( ref data, tokenIndex, attackIndex );
 	}
 }
