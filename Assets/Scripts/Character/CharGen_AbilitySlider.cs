@@ -48,6 +48,7 @@ public class CharGen_AbilitySlider : MonoBehaviour, IPointerDownHandler, IPointe
 
 	public void Setup ( int initValue, int min, int max, int step, string[] str=null ) 
 	{
+		if ( valueTabs.Count > 0 ) { return; }
 		minValue = min;
 		currentValue = initValue;
 		currentString = initValue+"";

@@ -11,12 +11,16 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 	public InputField characterNameField;
 	public InputField playerNameField;
 
+	public AttackDefinition attackDefinitionTemplate;
+	List<AttackDefinition> attackDefinitions = new List<AttackDefinition>();
+
 	CharacterStats stats;
 
 	List<CharGen_Ability> abilitySlots = new List<CharGen_Ability>();
 
 	void Start()
 	{
+		attackDefinitionTemplate.gameObject.SetActive ( false );
 		abilityButtonTemplate.gameObject.SetActive ( false );
 		foreach ( string s in CharacterStats.abilityNames )
 		{
@@ -36,6 +40,8 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 		characterNameField.text = "";
 		playerNameField.text = "";
 		stats = null;
+		foreach (AttackDefinition adef in attackDefinitions) { Destroy ( adef.gameObject ); }
+		attackDefinitions.Clear();
 	}
 
 	void AddAbilityButton ( string nm, int val, int min, int max, int step )
@@ -46,6 +52,27 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 		abBut.transform.localScale = Vector3.one;
 		abBut.Setup ( nm, val, min, max, step );
 		abilitySlots.Add ( abBut );
+	}
+
+	public void AddAttackDefinition()
+	{
+		AttackDefinition adef = Instantiate ( attackDefinitionTemplate );
+		InitDefinition ( adef );
+	}
+
+	public void DuplicateAttackDefinition ( AttackDefinition existingDef )
+	{
+		AttackDefinition adef = Instantiate ( existingDef );
+		InitDefinition ( adef );
+	}
+
+	void InitDefinition ( AttackDefinition adef )
+	{
+		adef.gameObject.SetActive ( true );
+		adef.transform.SetParent ( attackDefinitionTemplate.transform.parent );
+		adef.transform.localScale = Vector3.one;
+		adef.Init();
+		attackDefinitions.Add ( adef );
 	}
 
 	public void Save()
@@ -83,6 +110,11 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 		string playerName = playerNameField.text;
 
 		stats = new CharacterStats ( charName, playerName, level, abilities, hp, ac, spd );
+
+		foreach ( AttackDefinition adef in attackDefinitions )
+		{
+			stats.AddAttack ( adef.theAttack );
+		}
 
 		WorldMap.Instance.SpawnNewCharacter(stats);
 
