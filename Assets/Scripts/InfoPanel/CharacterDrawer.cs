@@ -82,9 +82,6 @@ public class CharacterDrawer : InfoDrawer
 	{
 		string attack = attackDropdown.captionText.text;
 
-		attackDropdown.value = 0;
-		attackDropdown.RefreshShownValue();
-
 		if ( attack == attackChooserHeader ) 
 		{
 			// Empty slot at start of list
@@ -105,8 +102,10 @@ public class CharacterDrawer : InfoDrawer
 		int statMod = stats.SkillModifier ( currentAttack.abilityForRoll );
 		statMod += currentAttack.plusToHit;
 
-		WorldMap.Instance.spinner.SpinTheWheel ( new Dice ( 1,20,statMod), ResultOfAttackRoll, targetRoll, "to hit" );
+		SpinnerPanel.Instance.SpinTheWheel ( new Dice ( 1,20,statMod), ResultOfAttackRoll, targetRoll, "to hit" );
 
+		attackDropdown.value = 0;
+		attackDropdown.RefreshShownValue();
 	}
 
 	int targetRoll = 0;
@@ -131,7 +130,7 @@ public class CharacterDrawer : InfoDrawer
 		if ( rollForDamage )
 		{
 			rollForDamage = false;
-			WorldMap.Instance.spinner.SpinTheWheel ( currentAttack.damageDice, ResultOfDamageRoll, -999, "damage" );
+			SpinnerPanel.Instance.SpinTheWheel ( currentAttack.damageDice, ResultOfDamageRoll, -999, "damage" );
 		}
 	}
 

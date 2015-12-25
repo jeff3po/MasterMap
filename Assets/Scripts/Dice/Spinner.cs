@@ -30,7 +30,8 @@ public class Spinner : MonoBehaviour
 		Unspun,
 		Windup, // TODO Allow dragging with finger to make it feel like a tangible spin in addition to single tap spin
 		Spinning,
-		Spun
+		Spun,
+		Delivered // Value sent back to spin manager
 	}
 
 	SpinState spinState = SpinState.Unspun;
@@ -157,11 +158,15 @@ public class Spinner : MonoBehaviour
 
 	public void SpinIt()
 	{
+		if ( spinState == SpinState.Delivered ) { return; }
+
 		if ( spinState == SpinState.Spun )
 		{
 			rollCallback ( finalValue, finalValue>=targetValue );
-			// Hide
-			this.gameObject.SetActive ( false );
+			// Hide self
+			gameObject.SetActive ( false );
+			// Callback should close when all rolling is done
+			return;
 		}
 
 		if ( spinState != SpinState.Unspun ) { return; }

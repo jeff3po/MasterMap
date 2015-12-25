@@ -62,7 +62,7 @@ public class TokenDeco : TokenBase
 //		statMod += currentAttack.plusToHit;
 		int targetRoll = currentActivity.difficulty;
 
-		WorldMap.Instance.spinner.SpinTheWheel ( new Dice ( 1,20,0), activityResult, targetRoll, "to "+currentActivity.Name );
+		SpinnerPanel.Instance.SpinTheWheel ( new Dice ( 1,20,0), activityResult, targetRoll, "to "+currentActivity.Name );
 	}
 
 	Activity currentActivity = null;

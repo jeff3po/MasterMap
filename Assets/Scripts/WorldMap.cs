@@ -9,7 +9,6 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 {
 	public TokenCharacter tokenCharacterTemplate;
 
-	public Spinner spinner;
 	public Chooser chooser;
 
 	public RectTransform tokenLayer;
@@ -69,6 +68,8 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 
 	void Start()
 	{
+		SpinnerPanel.Instance.gameObject.SetActive ( false );
+
 		roomManager.Init();
 
 		// Define a standard pallete of colors
