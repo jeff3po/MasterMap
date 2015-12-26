@@ -30,20 +30,22 @@ public class TokenCharacter : TokenDeco
 	public override void PostInit()
 	{
 		base.PostInit();
-		homeTile = WorldMap.Instance.roomManager.FindTileByID ( homeTileID );
+		homeTile = RoomManager.Instance.FindTileByID ( homeTileID );
 		transform.position = homeTile.transform.position;
 		FindNewHome();
 	}
 
-	public override void Init(JSONNode data, int tokenIndex)
+	public override void Init ( ref JSONNode data, int tokenIndex)
 	{
-		base.Init(data, tokenIndex);
-		stats = new CharacterStats ( data, tokenIndex );
+		base.Init( ref data, tokenIndex);
+		stats = new CharacterStats ( ref data, tokenIndex );
+		Name = stats.characterName;
 	}
 
 	public override void Export(ref JSONNode data, int tokenIndex)
 	{
 		base.Export(ref data, tokenIndex);
+//		Debug.Log ( "             Exporting   "+data.ToString() );
 
 		stats.Export ( ref data, tokenIndex );
 	}

@@ -6,11 +6,6 @@ using SimpleJSON;
 public class Door : TokenDeco 
 {
 	/// <summary>
-	/// Handy shortcut to the manager
-	/// </summary>
-	RoomManager roomManager;
-
-	/// <summary>
 	/// Which direction is it facing? (North-South or East-West for orientation, exact facing matters for barred door
 	/// </summary>
 	Facing facing;
@@ -42,7 +37,6 @@ public class Door : TokenDeco
 	{
 		base.SetupArchive();
 		Category = "Doors";
-		roomManager = FindObjectOfType<RoomManager>();
 	}
 
 	public override string UniqueID()
@@ -50,14 +44,13 @@ public class Door : TokenDeco
 		return "Door"+ID;
 	}
 
-	public void Setup ( RoomManager manager, FloorTile tile, Facing fac )
+	public void Setup ( FloorTile tile, Facing fac )
 	{
 		gameObject.SetActive ( true );
 
 		SetupArchive();
 
 		homeTile = tile;
-		roomManager = manager;
 		transform.SetParent( tile.transform);
 		transform.localScale = Vector3.one;
 		transform.localPosition = Vector3.zero;
@@ -102,18 +95,17 @@ public class Door : TokenDeco
 
 	public override void PostInit()
 	{
-		homeTile = roomManager.FindTileByID ( homeTileID );
-		if ( roomManager == null ) { Debug.LogError ( "Can't find room manager!");}
+		homeTile = RoomManager.Instance.FindTileByID ( homeTileID );
 
 		// Call setup from within to hook all the properties together
-		Setup ( roomManager, homeTile, facing );
+		Setup ( homeTile, facing );
 	}
 
-	public override void Init ( JSONNode data, int i )
+	public override void Init ( ref JSONNode data, int i )
 	{
 		SetupArchive();
 
-		base.Init ( data, i );
+		base.Init ( ref data, i );
 
 		homeTileID = data [ Category ] [ i ] [ "tileID" ];
 		string facingString = data [ Category ] [ i ] [ "facing" ];
@@ -140,7 +132,7 @@ public class Door : TokenDeco
 
 	public override string ToString()
 	{
-		string states = string.Format ("   Locked: {0}  Barred: {1}   Stuck: {2}", isLocked, isBarred, isStuck);
+		string states = string.Format ("   Locked: {0}  Barred: {1}   Stuck: {2} - homeTile: {3}", isLocked, isBarred, isStuck, homeTile.UniqueID());
 		string message = string.Format ( "{0} - facing {1} ", Name, facing.ToString() );
 		message += states;
 		return message;

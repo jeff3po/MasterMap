@@ -18,7 +18,7 @@ public class Dice
 		modifier = mod;
 	}
 
-	public Dice ( JSONNode data, int tokenIndex, int attackIndex )
+	public Dice ( ref JSONNode data, int tokenIndex, int attackIndex )
 	{
 		numberToRoll = data [ "Dice" ] [ tokenIndex ] [ "rolls" ] [ attackIndex ].AsInt;
 		numberOfFaces = data [ "Dice" ] [ tokenIndex ] [ "faces" ] [ attackIndex ].AsInt;

@@ -32,7 +32,7 @@ public class Archivable : MonoBehaviour
 
 	}
 
-	public virtual void Init ( JSONNode data, int i )
+	public virtual void Init ( ref JSONNode data, int i )
 	{
 		if ( Category == "SubclassMustDefine")
 		{

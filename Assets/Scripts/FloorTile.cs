@@ -160,7 +160,7 @@ public class FloorTile : MonoBehaviour, IDragHandler, IPointerEnterHandler, IScr
 	public void EndTouch()
 	{
 		touching = false;
-		WorldMap.Instance.roomManager.ResetAddFloorState();
+		RoomManager.Instance.ResetAddFloorState();
 	}
 
 	public void AttachDoor ( Door door )

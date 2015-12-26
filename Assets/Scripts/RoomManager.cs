@@ -7,7 +7,7 @@ using SimpleJSON;
 /// <summary>
 /// All things reoom-related
 /// </summary>
-public class RoomManager : MonoBehaviour
+public class RoomManager : SingletonMonoBehaviour<RoomManager>
 {
 	public WorldMap map;
 
@@ -55,7 +55,6 @@ public class RoomManager : MonoBehaviour
 	{
 		GameObject go = new GameObject();
 		Room newRoom = go.AddComponent<Room>();
-		newRoom.roomManager = this;
 		newRoom.SetupArchive();
 		newRoom.Setup(rooms.Count);
 		ControlPanel.Instance.visPanel.AddRoomToggle ( rooms.Count, newRoom.roomColor);
@@ -193,13 +192,15 @@ public class RoomManager : MonoBehaviour
 	{
 		if ( currentAddFloorState == AddFloorState.invalid ) { return; }
 
+		if ( tile.IsDoorway )
+		{
+			// Bring up door info, nothing else
+			map.InfoPanel ( tile.attachedDoor );
+			return;
+		}
+
 		if ( currentRoom == null ) 
 		{
-			if ( tile.IsDoorway )
-			{
-				// Bring up door info, nothing else
-				map.InfoPanel ( tile.attachedDoor );
-			}
 			return; 
 		}
 
@@ -297,7 +298,7 @@ public class RoomManager : MonoBehaviour
 	{
 		Door newDoor = GameObject.Instantiate ( doorTemplate );
 		// TODO: Locked, barred, stuck, trapped, etc
-		newDoor.Setup ( this, tile, facing );
+		newDoor.Setup ( tile, facing );
 
 		doors.Add ( newDoor );
 	}
@@ -354,8 +355,8 @@ public class RoomManager : MonoBehaviour
 
 	// - - -  A R C H I V I N G  - - - -
 
-	public void SaveAll()
-	{
+	public void SaveByName ( string nm )
+	{	
 		// Some quick sanity checks before writing this out.
 		// Go in reverse order so we can cull empty groups as we go
 		for ( int i=rooms.Count-1;i>=0;i--)
@@ -384,6 +385,7 @@ public class RoomManager : MonoBehaviour
 		foreach ( Door d in doors )
 		{
 			d.Export ( ref data, doorCount );
+//			Debug.Log ( "Door "+doorCount+" "+d.ToString() );
 			doorCount ++;
 		}
 		data [ "World" ] ["doorCount"].AsInt = doorCount;
@@ -397,27 +399,33 @@ public class RoomManager : MonoBehaviour
 		data [ "World" ] ["charCount"].AsInt = charCount;
 
 		string jsonstring = data.ToString();
-		PlayerPrefs.SetString ( "savefile", jsonstring );
+
+		PlayerPrefs.SetString ( nm, jsonstring );
 
 		Debug.Log ( DBDatabase.jsonToReadable ( jsonstring ) );
 	}
 
-	public void LoadAll()
+	public void LoadByName(string nm)
 	{
 		// Wipe out any previous
 		foreach ( Room r in rooms ) { Destroy ( r.gameObject ); }
 		rooms.Clear();
 		foreach ( Door d in doors ) { Destroy ( d.gameObject ); }
 		doors.Clear();
+		foreach ( TokenCharacter token in WorldMap.Instance.characterTokens ) { Destroy ( token.gameObject ); }
+		WorldMap.Instance.characterTokens.Clear();
 
-		string jsonString = PlayerPrefs.GetString ( "savefile" );
+		string jsonString = PlayerPrefs.GetString ( nm );
+
+		Debug.Log ( "Loading: "+jsonString );
 
 		JSONNode data = JSON.Parse ( jsonString );
+
 		int roomCount = data [ "World" ] [ "roomCount" ].AsInt ;
 		for ( int i=0;i<roomCount;i++)
 		{
 			Room newRoom = MakeNewRoom();
-			newRoom.Init ( data, i );
+			newRoom.Init ( ref data, i );
 			ControlPanel.Instance.drawingPanel.ResetPicker();
 		}
 
@@ -425,16 +433,9 @@ public class RoomManager : MonoBehaviour
 		for ( int i=0;i<doorCount;i++)
 		{
 			Door newDoor = Instantiate ( doorTemplate );
-			newDoor.Init ( data, i );
+			newDoor.Init ( ref data, i );
 			doors.Add ( newDoor );
 		}
-
-		// Clear any prior
-		foreach ( TokenCharacter token in WorldMap.Instance.characterTokens )
-		{
-			Destroy ( token.gameObject );
-		}
-		WorldMap.Instance.characterTokens.Clear();
 
 		int charCount = data [ "World" ] ["charCount"].AsInt;
 		for ( int i=0;i<charCount;i++ )
@@ -443,7 +444,7 @@ public class RoomManager : MonoBehaviour
 			token.gameObject.SetActive ( true );
 			token.transform.SetParent ( WorldMap.Instance.tokenLayer);
 			token.transform.localScale = Vector3.one;
-			token.Init ( data, i );
+			token.Init ( ref data, i );
 			WorldMap.Instance.characterTokens.Add ( token );
 		}
 

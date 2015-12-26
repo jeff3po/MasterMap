@@ -152,7 +152,7 @@ public class Activity
 		return success;
 	}
 
-	public Activity ( JSONNode data, int tokenIndex, int listIndex, int actIndex )
+	public Activity ( ref JSONNode data, int tokenIndex, int listIndex, int actIndex )
 	{
 		Name = data [ "Activity" ] [ tokenIndex ] [ "name" ] [ listIndex ] [ actIndex ];
 		difficulty = data [ "Activity" ] [ tokenIndex ] [ "diff" ] [ listIndex ] [ actIndex ].AsInt;

@@ -111,7 +111,7 @@ public class Attack
 		return damage;
 	}
 
-	public Attack ( JSONNode data, int tokenIndex, int attackIndex )
+	public Attack ( ref JSONNode data, int tokenIndex, int attackIndex )
 	{
 		title = data [ "Attack" ] [ tokenIndex ] [ "title" ] [ attackIndex ];
 		abilityForRoll = data [ "Attack" ] [ tokenIndex ] [ "ability"] [ attackIndex ];
@@ -120,7 +120,7 @@ public class Attack
 		range = data [ "Attack" ] [ tokenIndex ] [ "range"] [ attackIndex ].AsInt;
 		plusToHit = data [ "Attack" ] [ tokenIndex ] [ "toHit"] [ attackIndex ].AsInt;
 		damageType = data [ "Attack" ] [ tokenIndex ] [ "damage"] [ attackIndex ];
-		damageDice = new Dice ( data, tokenIndex, attackIndex );
+		damageDice = new Dice ( ref data, tokenIndex, attackIndex );
 	}
 
 	public void Export ( ref JSONNode data, int tokenIndex, int attackIndex )
@@ -132,5 +132,11 @@ public class Attack
 		data [ "Attack" ] [ tokenIndex ] [ "toHit"] [ attackIndex ].AsInt = plusToHit;
 		data [ "Attack" ] [ tokenIndex ] [ "damage"] [ attackIndex ] = damageType;
 		damageDice.Export ( ref data, tokenIndex, attackIndex );
+	}
+
+	public override string ToString()
+	{
+		string output = "\n"+title+" "+abilityForRoll+" "+attackType.ToString()+" "+range+"ft "+plusToHit+" to hit "+damageType+"  "+damageDice.numberToRoll+"d"+damageDice.numberOfFaces+"+"+damageDice.modifier;
+		return output;
 	}
 }

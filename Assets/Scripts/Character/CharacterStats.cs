@@ -77,30 +77,37 @@ public class CharacterStats
 		return delta/2;
 	}
 
-	public CharacterStats ( JSONNode data, int tokenIndex )
+	public CharacterStats ( ref JSONNode data, int tokenIndex )
 	{
 		characterName = data [ "Stats" ] [ tokenIndex ] [ "charName" ];
 		playerName = data [ "Stats" ] [ tokenIndex ] [ "playName" ];
 		level = data [ "Stats" ] [ tokenIndex ] [ "lev" ].AsInt;
 		armorClass = data [ "Stats" ] [ tokenIndex ] [ "ac" ].AsInt;
 		speed = data [ "Stats" ] [ tokenIndex ] [ "spd" ].AsInt;
-		hitPoints_Max = data [ "Stats" ] [ tokenIndex ] [ "hpMax" ].AsInt;
-		hitPoints_Current = data [ "Stats" ] [ tokenIndex ] [ "hpCur" ].AsInt;
-		hitPoints_Temporary = data [ "Stats" ] [ tokenIndex ] [ "hpTemp" ].AsInt;
+		int hpmax = data [ "Stats" ] [ tokenIndex ] [ "hpMax" ].AsInt;
+		int hpcur = data [ "Stats" ] [ tokenIndex ] [ "hpCur" ].AsInt;
+		int hptemp = data [ "Stats" ] [ tokenIndex ] [ "hpTemp" ].AsInt;
+
+		SetHP ( hpcur, hptemp, hpmax );
 
 		abilities.Clear();
 
+		int[] importedAbs = new int[6];
+		int i = 0;
 		foreach ( string ab in abilityNames )
 		{
 			int abilityValue = data [ "Stats" ] [ tokenIndex ] [ "Abilities" ] [ ab ].AsInt;
-			abilities.Add ( ab, abilityValue );
+			importedAbs[i] = abilityValue;
+			i++;
 		}
+
+		SetAbilities ( importedAbs );
 
 		attacks.Clear();
 		int attackIndex = data [ "Stats" ] [ tokenIndex ] [ "attackCount" ].AsInt;
 		for ( int a=0;a<attackIndex;a++)
 		{
-			Attack at = new Attack ( data, tokenIndex, a );
+			Attack at = new Attack ( ref data, tokenIndex, a );
 			attacks.Add ( at.title, at );
 		}
 	}
@@ -130,5 +137,26 @@ public class CharacterStats
 			attackIndex ++;
 		}
 		data [ "Stats" ] [ tokenIndex ] [ "attackCount" ].AsInt = attackIndex;
+	}
+
+
+	public override string ToString()
+	{
+		string output = characterName+" "+playerName+" Level: "+level+"  AC: "+armorClass+"  spd: "+speed+"  hpMax: "+
+			hitPoints_Max+"  hpCur: "+hitPoints_Current+"  hpTemp: "+hitPoints_Temporary+"\n";
+		
+		foreach ( string key in abilities.Keys)
+		{
+			int stat = 0;
+			abilities.TryGetValue ( key, out stat );
+			output += key+": "+stat+"  ";
+		}
+
+		foreach ( Attack a in attacks.Values )
+		{
+			output += a.ToString();
+		}
+
+		return output;
 	}
 }

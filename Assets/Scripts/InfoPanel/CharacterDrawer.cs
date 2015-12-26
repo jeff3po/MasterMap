@@ -124,6 +124,11 @@ public class CharacterDrawer : InfoDrawer
 	{
 		Debug.Log ( "Damage: "+result );
 	}
+
+	public void EditCharacter()
+	{
+		CharacterGenerator.Instance.Init ( stats );
+	}
 		
 	void Update()
 	{

@@ -21,12 +21,14 @@ public class CharGen_AbilitySlider : MonoBehaviour, IPointerDownHandler, IPointe
 	public bool horizontal = true;
 
 	int minValue = 0;
-	int currentValue = 10;
+
+	[HideInInspector]
+	public int currentValue = 10;
 	string currentString = "";
 
 	List<Image> valueTabs = new List<Image>();
 
-	void SetDisplayedValue()
+	public void SetDisplayedValue()
 	{
 		string textToDisplay = currentString;
 

@@ -39,7 +39,7 @@ public class AttackDefinition : MonoBehaviour
 
 	string[] diceFaces = new string[] { "4", "6", "8", "10", "12", "20", "100" };
 
-	public void Init()
+	public void Init ( Attack a )
 	{
 		abilityValue.Setup ( 0, 0, 10, 1, CharacterStats.abilityNames );
 		rangeValue.Setup ( 5, 5, 120, 5 );
@@ -48,5 +48,17 @@ public class AttackDefinition : MonoBehaviour
 		diceFace.Setup ( 0, 0, 1, 1, diceFaces );
 		diceMod.Setup ( 0, -10, 10, 1 );
 		diceDam.Setup ( 0, 0, 1, 1, Attack.DamageType );
+
+		if ( a != null )
+		{
+			attackName.text = a.title;
+			abilityValue.value.text = a.abilityForRoll;
+			rangeValue.value.text = a.range.ToString();
+			toHitValue.value.text = a.plusToHit.ToString();
+			diceNum.value.text = a.damageDice.numberToRoll.ToString();
+			diceFace.value.text = a.damageDice.numberOfFaces.ToString();
+			diceMod.value.text = a.damageDice.modifier.ToString();
+			diceDam.value.text = a.damageType;
+		}
 	}
 }

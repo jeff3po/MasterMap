@@ -8,8 +8,6 @@ using SimpleJSON;
 /// </summary>
 public class Room : Archivable
 {
-	public RoomManager roomManager;
-
 	public bool isVisible = true;
 
 	public Color roomColor = Color.white;
@@ -138,15 +136,15 @@ public class Room : Archivable
 		// Find matching tiles in tile list
 		foreach ( string s in tileIDs )
 		{
-			AddFloorTile ( roomManager.FindTileByID ( s ) );
+			AddFloorTile ( RoomManager.Instance.FindTileByID ( s ) );
 		}
 	}
 
-	public override void Init ( JSONNode data, int i )
+	public override void Init ( ref JSONNode data, int i )
 	{
 		tileIDs.Clear();
 
-		base.Init ( data, i );
+		base.Init ( ref data, i );
 		int tileCount = data [ Category ] [ i ] [ "tileCount" ].AsInt;
 		for ( int tc=0;tc<tileCount;tc++)
 		{
@@ -160,11 +158,14 @@ public class Room : Archivable
 		base.Export (ref data, i);
 
 		int tileCount = 0;
+		string output = "Room "+i+" Tiles: ";
 		foreach ( FloorTile t in tiles.Values )
 		{
 			data [ Category ] [ i ] [ "tile" ] [tileCount ] = t.UniqueID();
+			output += " "+t.UniqueID();
 			tileCount++;
 		}
+//		Debug.Log ( output );
 		data [ Category ] [ i ] [ "tileCount" ].AsInt = tileCount;
 	}
 }

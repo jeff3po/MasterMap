@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator> 
 {
+	bool spawnNew = true;
 	public Image frame;
 	public CharGen_Ability abilityButtonTemplate;
 
@@ -18,8 +19,11 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 
 	List<CharGen_Ability> abilitySlots = new List<CharGen_Ability>();
 
+	bool initialized = false;
 	void Start()
 	{
+		if ( initialized ) { return; }
+		initialized = true;
 		attackDefinitionTemplate.gameObject.SetActive ( false );
 		abilityButtonTemplate.gameObject.SetActive ( false );
 		foreach ( string s in CharacterStats.abilityNames )
@@ -34,14 +38,34 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 		gameObject.SetActive( false );
 	}
 
+	public void Init ( CharacterStats s )
+	{
+		Start();
+		spawnNew = false;
+		gameObject.SetActive ( true );
+		stats = s;
+		characterNameField.text = stats.characterName;
+		playerNameField.text = stats.playerName;
+		foreach ( Attack a in stats.attacks.Values )
+		{
+			AddAttackDefinition ( a );
+		}
+
+		foreach ( CharGen_Ability stat in abilitySlots )
+		{
+			stats.abilities.TryGetValue ( stat.title.text, out stat.abilityValue);
+			stat.value.currentValue = stat.abilityValue;
+			stat.value.SetDisplayedValue();
+		}
+	}
+
 	public void Init()
 	{
+		spawnNew = true;
 		gameObject.SetActive ( true );
 		characterNameField.text = "";
 		playerNameField.text = "";
 		stats = null;
-		foreach (AttackDefinition adef in attackDefinitions) { Destroy ( adef.gameObject ); }
-		attackDefinitions.Clear();
 	}
 
 	void AddAbilityButton ( string nm, int val, int min, int max, int step )
@@ -52,6 +76,12 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 		abBut.transform.localScale = Vector3.one;
 		abBut.Setup ( nm, val, min, max, step );
 		abilitySlots.Add ( abBut );
+	}
+
+	void AddAttackDefinition ( Attack a )
+	{
+		AttackDefinition adef = Instantiate ( attackDefinitionTemplate );
+		InitDefinition ( adef, a );
 	}
 
 	public void AddAttackDefinition()
@@ -66,12 +96,12 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 		InitDefinition ( adef );
 	}
 
-	void InitDefinition ( AttackDefinition adef )
+	void InitDefinition ( AttackDefinition adef, Attack a=null )
 	{
 		adef.gameObject.SetActive ( true );
 		adef.transform.SetParent ( attackDefinitionTemplate.transform.parent );
 		adef.transform.localScale = Vector3.one;
-		adef.Init();
+		adef.Init(a);
 		attackDefinitions.Add ( adef );
 	}
 
@@ -116,13 +146,23 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 			stats.AddAttack ( adef.theAttack );
 		}
 
-		WorldMap.Instance.SpawnNewCharacter(stats);
+		if ( spawnNew )
+		{
+			WorldMap.Instance.SpawnNewCharacter(stats);
+		}
 
-		gameObject.SetActive ( false );
+		CloseGenerator();
 	}
 
 	public void Cancel()
 	{
+		CloseGenerator();
+	}
+
+	void CloseGenerator()
+	{
+		foreach (AttackDefinition adef in attackDefinitions) { Destroy ( adef.gameObject ); }
+		attackDefinitions.Clear();
 		gameObject.SetActive ( false );
 	}
 }

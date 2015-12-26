@@ -13,8 +13,6 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 
 	public RectTransform tokenLayer;
 
-	public RoomManager roomManager;
-
 	public Image mapBG;
 
 	public List<TokenCharacter> characterTokens = new List<TokenCharacter>();
@@ -72,7 +70,7 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 	{
 		SpinnerPanel.Instance.gameObject.SetActive ( false );
 
-		roomManager.Init();
+		RoomManager.Instance.Init();
 
 		// Define a standard pallete of colors
 		for ( int r=0;r<3;r++)
@@ -92,7 +90,7 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 		// Build the world according to specs
 		worldGrid = new FloorTile[columnCount,rowCount];
 
-		Vector2 tilesize = roomManager.floorTileSize;
+		Vector2 tilesize = RoomManager.Instance.floorTileSize;
 		float tileWidth = tilesize.x;
 		float tileHeight = tilesize.y;
 
@@ -101,17 +99,17 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 		{
 			for ( int y=0;y<rowCount;y++)
 			{
-				FloorTile newTile = Instantiate ( roomManager.floorTileTemplate );
+				FloorTile newTile = Instantiate ( RoomManager.Instance.floorTileTemplate );
 				newTile.gameObject.SetActive ( true );
 
-				newTile.transform.SetParent ( roomManager.floorTileTemplate.transform.parent );
+				newTile.transform.SetParent ( RoomManager.Instance.floorTileTemplate.transform.parent );
 				newTile.transform.localScale = Vector3.one;
 				newTile.transform.localPosition = new Vector3 ( (tileWidth) + (tileWidth * x), (tileHeight)+(tileHeight * y), 0 );
 				newTile.Setup ( x, y );
 				newTile.name = x+"_"+y;
 				worldGrid[x,y] = newTile;
 				newTile.transform.SetAsFirstSibling();
-				roomManager.allTiles.Add ( newTile );
+				RoomManager.Instance.allTiles.Add ( newTile );
 			}
 		}
 
@@ -125,7 +123,7 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 		// TODO: More elegant than this
 		float closestDist = 999999;
 		FloorTile closestTile = null;
-		foreach ( FloorTile t in roomManager.allTiles )
+		foreach ( FloorTile t in RoomManager.Instance.allTiles )
 		{
 			float distFromTile = ( t.transform.position - worldPos ).magnitude;
 			if ( distFromTile < closestDist )
@@ -228,39 +226,39 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 
 	public void SetRoomVisibility ( int index, bool vis )
 	{
-		roomManager.SetRoomVisibility (index, vis);
+		RoomManager.Instance.SetRoomVisibility (index, vis);
 	}
 
 	public void AddRoom()
 	{
-		roomManager.AddRoom();
+		RoomManager.Instance.AddRoom();
 	}
 
 	public int RoomShift ( int dir )
 	{
-		return roomManager.RoomShift(dir);
+		return RoomManager.Instance.RoomShift(dir);
 	}
 
 	public void SetCurrentRoom ( Room room )
 	{
-		roomManager.SetCurrentRoom(room);
+		RoomManager.Instance.SetCurrentRoom(room);
 	}
 
 	public bool SetCurrentRoomName ( string nm )
 	{
-		return roomManager.SetCurrentRoomName ( nm );
+		return RoomManager.Instance.SetCurrentRoomName ( nm );
 	}
 
 	public Room SetCurrentRoom ( int roomID )
 	{
-		return roomManager.SetCurrentRoom(roomID);
+		return RoomManager.Instance.SetCurrentRoom(roomID);
 	}
 
 
 	public void InfoPanel ( Door door )
 	{
 		// Info panel about door
-		roomManager.SetDebugMessage ( door.ToString() );
+		RoomManager.Instance.SetDebugMessage ( door.ToString() );
 	}
 
 
@@ -285,7 +283,7 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 		else
 		if ( editMode == EditMode.Room )
 		{
-			roomManager.InteractWithFloorTile ( tile );
+				RoomManager.Instance.InteractWithFloorTile ( tile );
 		}
 		else
 		if ( editMode == EditMode.Deco )
@@ -318,17 +316,17 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 	{
 		FloorTile theTile = null;
 
-		Room goodRoom = roomManager.currentRoom;
+		Room goodRoom = RoomManager.Instance.currentRoom;
 		if ( goodRoom == null )
 		{
-			if ( roomManager.rooms.Count > 0 )
+			if ( RoomManager.Instance.rooms.Count > 0 )
 			{
-				goodRoom = roomManager.rooms[0];
+				goodRoom = RoomManager.Instance.rooms[0];
 			}
 			else
 			{
 				// No room, just grab the middle tile
-				theTile = roomManager.allTiles [ roomManager.allTiles.Count/15];
+				theTile = RoomManager.Instance.allTiles [ RoomManager.Instance.allTiles.Count/15];
 			}
 		}
 

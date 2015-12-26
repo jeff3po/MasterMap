@@ -96,19 +96,19 @@ public class TokenBase : Archivable, IBeginDragHandler, IDragHandler, IEndDragHa
 	{
 		base.PostInit();
 		// Find hometile 
-		homeTile = WorldMap.Instance.roomManager.FindTileByID(homeTileID);
+		homeTile = RoomManager.Instance.FindTileByID(homeTileID);
 	}
 
-	public override void Init ( JSONNode data, int tokenIndex )
+	public override void Init ( ref JSONNode data, int tokenIndex )
 	{
-		base.Init ( data, tokenIndex );
+		base.Init ( ref data, tokenIndex );
 		homeTileID = data [ Category ] [ tokenIndex ] [ "hometile" ];
 		_isMobile = data [ Category ] [ tokenIndex ] [ "isMobile" ].AsBool;
 
-		int listCount = data [ Category ] [ tokenIndex ] [ "listCount" ].AsInt;
+		int listCount = data [ Category ] [ tokenIndex ] [ "activitylistCount" ].AsInt;
 		for ( int listIndex=0;listIndex<listCount;listIndex++)
 		{
-			ActivityList newList = new ActivityList( data, tokenIndex, listIndex );
+			ActivityList newList = new ActivityList( ref data, tokenIndex, listIndex );
 			allPossibleActivities.Add ( newList.title, newList );
 		}
 	}
@@ -116,18 +116,19 @@ public class TokenBase : Archivable, IBeginDragHandler, IDragHandler, IEndDragHa
 	public override void Export(ref JSONNode data, int tokenIndex)
 	{
 		base.Export(ref data, tokenIndex);
+
 		data [ Category ] [ tokenIndex ] [ "hometile" ] = homeTile.UniqueID();
 		data [ Category ] [ tokenIndex ] [ "isMobile" ].AsBool = _isMobile;
 
 		int listCount = 0;
-		if ( allPossibleActivities != null )
+		if ( allPossibleActivities != null && allPossibleActivities.Count > 0)
 		{
 			foreach ( ActivityList list in allPossibleActivities.Values )
 			{
 				list.Export(ref data, tokenIndex, listCount );
 				listCount ++;
 			}
-			data [ Category ] [ tokenIndex ] [ "listCount" ].AsInt = listCount;
+			data [ Category ] [ tokenIndex ] [ "activitylistCount" ].AsInt = listCount;
 		}
 	}
 }
