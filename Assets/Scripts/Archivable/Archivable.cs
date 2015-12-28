@@ -41,6 +41,7 @@ public class Archivable : MonoBehaviour
 		}
 		Name = data [ Category ] [ i ] [ "name" ];
 		ID = data [ Category ] [ i ] [ "ID" ].AsInt;
+		SimpleID.ValidateID ( ID );
 	}
 
 	public virtual void Export ( ref JSONNode data, int i )

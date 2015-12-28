@@ -40,7 +40,7 @@ public class CharacterStats
 
 	public void AddAttack ( Attack a )
 	{
-		if ( attacks.ContainsKey ( a.title ) ) { return; }
+		if ( attacks.ContainsKey ( a.title ) ) { attacks.Remove ( a.title ); }
 		attacks.Add ( a.title, a );
 	}
 

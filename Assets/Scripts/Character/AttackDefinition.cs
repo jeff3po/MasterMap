@@ -26,10 +26,10 @@ public class AttackDefinition : MonoBehaviour
 			int range = int.Parse ( rangeValue.value.text );
 			string type = attackType.options[attackType.value].text;
 			Attack.AttackType atype = (Attack.AttackType) System.Enum.Parse ( typeof ( Attack.AttackType ), type );
-			int toHit = int.Parse (toHitValue.value.text);
+			int toHit = int.Parse (toHitValue.value.text.Replace("+",""));
 			int diceNumber = int.Parse ( diceNum.value.text );
 			int diceFaces = int.Parse ( diceFace.value.text );
-			int diceModifier = int.Parse ( diceMod.value.text );
+			int diceModifier = int.Parse ( diceMod.value.text.Replace("+","") );
 			string diceDamage = diceDam.value.text;
 
 			Attack a = new Attack ( title, ability, range, atype, toHit, diceNumber, diceFaces, diceModifier, diceDamage );
@@ -54,11 +54,18 @@ public class AttackDefinition : MonoBehaviour
 			attackName.text = a.title;
 			abilityValue.value.text = a.abilityForRoll;
 			rangeValue.value.text = a.range.ToString();
-			toHitValue.value.text = a.plusToHit.ToString();
+			toHitValue.value.text = AddPlusOnPositive (a.plusToHit);
 			diceNum.value.text = a.damageDice.numberToRoll.ToString();
 			diceFace.value.text = a.damageDice.numberOfFaces.ToString();
-			diceMod.value.text = a.damageDice.modifier.ToString();
+			diceMod.value.text = AddPlusOnPositive (a.damageDice.modifier);
 			diceDam.value.text = a.damageType;
 		}
+	}
+
+	public static string AddPlusOnPositive ( int val )
+	{
+		if ( val >= 0 ) { return "+"+val; }
+
+		return ""+val;
 	}
 }

@@ -46,14 +46,15 @@ public class Attack
 
 	public string damageType = "None";
 
-	public Attack ( string tit, string ab, int r, AttackType atype, int plusToHit, int damDiceNumber, int damDiceFace, int damDiceMod, string dType )
+	public Attack ( string tit, string ab, int r, AttackType atype, int toHit, int damDiceNumber, int damDiceFace, int damDiceMod, string dType )
 	{
 		title = tit;
 		abilityForRoll = ab;
 		range = r;
 		attackType = atype;
-		damageType = dType;
+		plusToHit = toHit;
 		damageDice = new Dice ( damDiceNumber, damDiceFace, damDiceMod );
+		damageType = dType;
 	}
 
 	/// <summary>

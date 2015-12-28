@@ -8,101 +8,99 @@ using DG.Tweening;
 /// <summary>
 /// Holding the value field of the ability field brings up a drag interface to quickly set value
 /// </summary>
-public class CharGen_AbilitySlider : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
+public class CharGen_AbilitySlider : MonoBehaviour, IDragHandler
 {
+	public Image ring;
+	public Image ringcore;
+
+	Text modifierTextField;
+
 	public Text value;
-	public Image slider;
-	public Image valueTemplate;
-	public RectTransform centerMark;
 	string[] strings;
 	[HideInInspector]
 	public bool usesStrings = false;
 
 	public bool horizontal = true;
 
+	float valueRange = 1;
 	int minValue = 0;
+	int maxValue = 0;
+	int step = 1;
 
 	[HideInInspector]
 	public int currentValue = 10;
-	string currentString = "";
-
-	List<Image> valueTabs = new List<Image>();
 
 	public void SetDisplayedValue()
 	{
-		string textToDisplay = currentString;
+		string textToDisplay = currentValue+"";
 
 		if ( usesStrings == false )
 		{
-			currentValue = int.Parse ( textToDisplay );
-
 			if ( minValue < 0 )
 			{
 				// Since we care about negative values, add + to 0 so there's always a sign
-				if ( currentValue == 0 )
+				if ( currentValue >= 0 )
 				{
 					textToDisplay = "+"+textToDisplay;
 				}
 			}
 		}
+		else
+		{
+			
+			textToDisplay = strings[ Mathf.Min ( currentValue, strings.Length-1 ) ];
+		}
+
 		value.text = textToDisplay;
+
+		if ( ring != null )
+		{
+			float pct = (float)currentValue/valueRange;
+			ring.fillAmount = pct;
+			ringcore.fillAmount = pct;
+			Color c = ring.color;
+			c.a = pct;
+			ring.color = c;
+		}
+
+		if ( modifierTextField != null )
+		{
+			int delta = currentValue - 10;
+			delta /= 2;
+
+			string disp = delta+"";
+			if ( delta >= 0 ) { disp = "+"+disp; }
+			modifierTextField.text = disp;
+		}
 	}
 
-	public void Setup ( int initValue, int min, int max, int step, string[] str=null ) 
+	public void Setup ( int initValue, int min, int max, int stp, string[] str=null, Text mod=null ) 
 	{
-		if ( valueTabs.Count > 0 ) { return; }
+		modifierTextField = mod;
+		step = stp;
 		minValue = min;
+		maxValue = max;
 		currentValue = initValue;
-		currentString = initValue+"";
+		valueRange = max - min;
 
 		if ( str != null )
 		{
 			usesStrings = true;
 			strings = str;
-			currentString = strings [ initValue ];
 		}
-
-		valueTemplate.gameObject.SetActive ( false );
-		slider.gameObject.SetActive ( false );
 
 		SetDisplayedValue();
-
-		if ( valueTabs.Count == 0 )
-		{
-			// Array the numbers. Inclusive of max value except when using a string list 
-			int count = max+1;
-			if ( usesStrings ) { count = strings.Length; }
-			for ( int i=min;i<count;i+=step)
-			{
-				Image val = Instantiate ( valueTemplate );
-				val.gameObject.SetActive ( true );
-				val.transform.SetParent ( valueTemplate.transform.parent );
-				val.transform.localScale = Vector3.one;
-				string numberToDisplay = ""+i;
-				if ( usesStrings ) { numberToDisplay = strings[i]; }
-				if ( min < 0 )
-				{
-					// We care about negative values, so add + 
-					if ( i > 0 )
-					{
-						numberToDisplay = "+"+i;
-					}
-				}
-				val.GetComponentInChildren<Text>().text = numberToDisplay;
-				valueTabs.Add ( val );
-			}
-		}
 	}
 
-	float updateDistance = 0;
+	float dragDistance = 0;
+
+	/// <summary>
+	/// How many pixels to drag to change the value one unit
+	/// </summary>
+	public float dragInterval = 10;
 
 	public void OnDrag ( PointerEventData data)
 	{
-		if ( updateDistance == 0 )
-		{
-			updateDistance = value.rectTransform.sizeDelta.x *0.1f;
-		}
-
 		Vector2 delta = data.delta;
 		if ( horizontal )
 		{
@@ -112,65 +110,24 @@ public class CharGen_AbilitySlider : MonoBehaviour, IPointerDownHandler, IPointe
 		{
 			delta.x = 0;
 		}
-		slider.transform.Translate ( delta );
 
-		updatedDrag += delta;
+		dragDistance += delta.x + delta.y;
 
-		float updateDist = updatedDrag.x;
-		if ( !horizontal) { updateDist = updatedDrag.y; }
-
-		if ( Mathf.Abs ( updateDist ) > updateDistance )
+		while ( dragDistance > dragInterval )
 		{
-			updatedDrag = Vector3.zero;
-			// Each time it moves, find the closest number on the strip to the unerlying value field. 
-			float closestDist = 99999;
-			foreach ( Image tab in valueTabs )
-			{
-				float dist = (tab.transform.position - centerMark.position).magnitude;
-
-				if ( dist < closestDist )
-				{
-					closestDist = dist;
-					closestTab = tab;
-				}
-			}
-			RefreshTabs();
+			dragDistance -= dragInterval;
+			currentValue += step;
 		}
-	}
 
-	Vector2 updatedDrag = Vector2.zero;
-
-	Image closestTab = null;
-
-	void RefreshTabs()
-	{
-		foreach ( Image tab in valueTabs )
+		while ( dragDistance < -dragInterval )
 		{
-			if ( tab == closestTab )
-			{
-				tab.DOKill();
-				tab.DOFade ( 1.0f, 0.1f );
-
-				currentString = tab.GetComponentInChildren<Text>().text;
-
-				SetDisplayedValue();
-			}
-			else
-			{
-				tab.DOFade ( 0.1f, 0.4f );
-			}
+			dragDistance += dragInterval;
+			currentValue -= step;
 		}
-	}
 
-	public void OnPointerDown ( PointerEventData data )
-	{
-		if ( slider.gameObject.activeSelf ) { return; }
-		slider.gameObject.SetActive ( true );
-		RefreshTabs();
-	}
+		if ( currentValue < minValue ) { currentValue = minValue; }
+		if ( currentValue > maxValue) { currentValue = maxValue; }
 
-	public void OnPointerUp ( PointerEventData data )
-	{
-		slider.gameObject.SetActive ( false );
+		SetDisplayedValue();
 	}
 }

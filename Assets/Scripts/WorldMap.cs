@@ -302,6 +302,7 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 	{
 		TokenCharacter token = Instantiate ( tokenCharacterTemplate );
 		token.gameObject.SetActive ( true );
+		token.SetupArchive();
 		token.transform.localScale = Vector3.one;
 		// Find a good spot
 		FloorTile tile = BestTileForSpawn();
