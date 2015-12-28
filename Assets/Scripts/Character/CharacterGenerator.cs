@@ -18,6 +18,8 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 
 	CharacterStats stats;
 
+	string incomingCharacter = "";
+
 	List<CharGen_Stat> abilitySlots = new List<CharGen_Stat>();
 
 	bool initialized = false;
@@ -43,6 +45,8 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 	public void Init ( CharacterStats s )
 	{
 		Start();
+		incomingCharacter = s.characterName;
+
 		spawnNew = false;
 		gameObject.SetActive ( true );
 		stats = s;
@@ -86,7 +90,7 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 		abBut.gameObject.SetActive ( true );
 		abBut.transform.SetParent ( abilityButtonTemplate.transform.parent );
 		abBut.transform.localScale = Vector3.one;
-		abBut.Setup ( nm, val, 3, 24, 1 );
+		abBut.SetupAbility ( nm, val, 3, 24, 1 );
 		abilitySlots.Add ( abBut );
 	}
 
@@ -96,7 +100,7 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 		statButton.gameObject.SetActive ( true );
 		statButton.transform.SetParent ( abilityButtonTemplate.transform.parent );
 		statButton.transform.localScale = Vector3.one;
-		statButton.Setup ( nm, val, min, max, step );
+		statButton.SetupStat ( nm, val, min, max, step );
 		abilitySlots.Add ( statButton );
 	}
 
@@ -131,16 +135,17 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 	{
 		// Dump all the values into the character stats
 
-		// Shove it all into a dictionary
+		// Shove all the entries in the stats column into a single dictionary
 		Dictionary<string,int> statlist = new Dictionary<string, int>();
 
-		foreach ( CharGen_Ability slot in abilitySlots )
+		// First six are abilities
+		foreach ( CharGen_Stat slot in abilitySlots )
 		{
 			int val = int.Parse(slot.value.value.text);
 			statlist.Add ( slot.title.text, val );
 		}
 
-		// Abilities
+		// Extract abilities from that list
 		int[] abilities = new int[6];
 		int i=0;
 		foreach ( string s in CharacterStats.abilityNames )
@@ -149,6 +154,7 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 			i++;
 		}
 
+		// Pick out the individual stats from the rest of the list
 		int hp = 0;
 		statlist.TryGetValue ( "HP", out hp );
 		int spd = 0;
@@ -157,11 +163,6 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 		statlist.TryGetValue ( "AC", out ac );
 		int level = 0;
 		statlist.TryGetValue ( "Lvl", out level );
-
-		UpdateStatValue ( "HP", hp );
-		UpdateStatValue ( "Spd", spd );
-		UpdateStatValue ( "AC", ac );
-		UpdateStatValue ( "Lvl", level );
 
 		string charName = characterNameField.text;
 		string playerName = playerNameField.text;
@@ -176,6 +177,25 @@ public class CharacterGenerator : SingletonMonoBehaviour<CharacterGenerator>
 		if ( spawnNew )
 		{
 			WorldMap.Instance.SpawnNewCharacter(stats);
+		}
+		else
+		{
+			// Replace the existing character with this new one
+			for ( int tc=0;tc<WorldMap.Instance.characterTokens.Count;tc++)
+			{
+				TokenCharacter ch = WorldMap.Instance.characterTokens[tc];
+
+				if ( ch.stats.characterName == incomingCharacter )
+				{
+					// Delete and re-create this one
+					TokenCharacter newChar = WorldMap.Instance.SpawnNewCharacter ( stats );
+					newChar.transform.position = ch.transform.position;
+					newChar.FindNewHome();
+					WorldMap.Instance.characterTokens.Remove ( ch );
+					Destroy ( ch.gameObject );
+					break;
+				}
+			}
 		}
 
 		CloseGenerator();

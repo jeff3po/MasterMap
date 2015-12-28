@@ -298,7 +298,7 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 		CharacterGenerator.Instance.Init();
 	}
 
-	public void SpawnNewCharacter ( CharacterStats stats )
+	public TokenCharacter SpawnNewCharacter ( CharacterStats stats )
 	{
 		TokenCharacter token = Instantiate ( tokenCharacterTemplate );
 		token.gameObject.SetActive ( true );
@@ -311,6 +311,7 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 		token.FindNewHome();
 		token.stats = stats;
 		characterTokens.Add ( token );
+		return token;
 	}
 
 	FloorTile BestTileForSpawn()

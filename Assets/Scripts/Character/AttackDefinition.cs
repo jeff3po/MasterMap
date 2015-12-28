@@ -41,13 +41,13 @@ public class AttackDefinition : MonoBehaviour
 
 	public void Init ( Attack a )
 	{
-		abilityValue.Setup ( 0, 0, 10, 1, CharacterStats.abilityNames );
+		abilityValue.Setup ( 0, 0, 6, 1, CharacterStats.abilityNames );
 		rangeValue.Setup ( 5, 5, 120, 5 );
 		toHitValue.Setup ( 0, -10, 10, 1 );
 		diceNum.Setup ( 1, 1, 10, 1 );
 		diceFace.Setup ( 0, 0, 1, 1, diceFaces );
 		diceMod.Setup ( 0, -10, 10, 1 );
-		diceDam.Setup ( 0, 0, 1, 1, Attack.DamageType );
+		diceDam.Setup ( 0, 0, Attack.DamageType.Length, 1, Attack.DamageType );
 
 		if ( a != null )
 		{

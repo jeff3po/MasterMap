@@ -417,6 +417,11 @@ public class RoomManager : SingletonMonoBehaviour<RoomManager>
 
 		string jsonString = PlayerPrefs.GetString ( nm );
 
+		if ( jsonString == "" )
+		{
+			Debug.LogError ( "Can't load "+nm );
+			return;
+		}
 		Debug.Log ( "Loading: "+jsonString );
 
 		JSONNode data = JSON.Parse ( jsonString );

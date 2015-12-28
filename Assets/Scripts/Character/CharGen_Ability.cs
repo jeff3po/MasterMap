@@ -6,7 +6,7 @@ public class CharGen_Ability : CharGen_Stat
 {
 	public Text modifier;
 
-	public void Setup ( string nm, int val, int min, int max, int step )
+	public void SetupAbility ( string nm, int val, int min, int max, int step )
 	{
 		abilityValue = val;
 		title.text = nm;

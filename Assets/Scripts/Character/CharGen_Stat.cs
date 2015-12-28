@@ -8,7 +8,7 @@ public class CharGen_Stat : MonoBehaviour
 	public CharGen_AbilitySlider value;
 	public int abilityValue=10;
 
-	public void Setup ( string nm, int val, int min, int max, int step )
+	public void SetupStat ( string nm, int val, int min, int max, int step )
 	{
 		abilityValue = val;
 		title.text = nm;
