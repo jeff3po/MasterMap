@@ -73,11 +73,11 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 		RoomManager.Instance.Init();
 
 		// Define a standard pallete of colors
-		for ( int r=0;r<3;r++)
+		for ( int r=2;r>=0;r--)
 		{
-			for ( int g=0;g<3;g++)
+			for ( int g=2;g>=0;g--)
 			{
-				for ( int b=0;b<3;b++)
+				for ( int b=2;b>=0;b--)
 				{
 					Color c = new Color ( r*0.33f, g*0.33f, b*0.33f);
 					globalColors.Add ( c );
@@ -116,6 +116,7 @@ public class WorldMap : SingletonMonoBehaviour<WorldMap>, IScrollHandler
 		mapSize = mapBG.rectTransform.sizeDelta;
 		targetScrollPos.x = -mapSize.x/2;
 		targetScrollPos.y = -mapSize.y/2;
+		SetEditMode ( EditMode.Play );
 	}
 
 	public FloorTile FindClosestTile ( Vector3 worldPos )

@@ -45,7 +45,7 @@ public class AttackDefinition : MonoBehaviour
 		rangeValue.Setup ( 5, 5, 120, 5 );
 		toHitValue.Setup ( 0, -10, 10, 1 );
 		diceNum.Setup ( 1, 1, 10, 1 );
-		diceFace.Setup ( 0, 0, 1, 1, diceFaces );
+		diceFace.Setup ( 0, 0, diceFaces.Length, 1, diceFaces );
 		diceMod.Setup ( 0, -10, 10, 1 );
 		diceDam.Setup ( 0, 0, Attack.DamageType.Length, 1, Attack.DamageType );
 

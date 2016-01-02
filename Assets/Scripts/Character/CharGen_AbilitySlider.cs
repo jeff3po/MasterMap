@@ -115,6 +115,20 @@ public class CharGen_AbilitySlider : MonoBehaviour, IDragHandler, IPointerDownHa
 
 	void SetTrail ( Text trail, int index )
 	{
+		if ( strings == null || strings.Length == 0 )
+		{
+			if ( index < minValue || index > maxValue )
+			{
+				trail.text = "";
+			}
+			else
+			{
+				trail.text = index+"";
+			}
+			return;
+		}
+
+
 		if ( index < 0 || index >= strings.Length )
 		{
 			trail.text = "";
@@ -143,7 +157,7 @@ public class CharGen_AbilitySlider : MonoBehaviour, IDragHandler, IPointerDownHa
 		SetDisplayedValue();
 
 		// Full range left or right from center
-		dragInterval = 0.5f/valueRange;
+		dragInterval = 0.025f;
 
 		ShowTrails ( false );
 	}
